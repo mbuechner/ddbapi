@@ -1,0 +1,3553 @@
+openapi: 3.0.3
+info:
+  title: API der Deutsche Digitalen Bibliothek
+  version: 2.6.1
+  description: |
+    ![DDB logo](https://www.deutsche-digitale-bibliothek.de/assets/logoHeaderSmall.png)
+    ## Beschreibung
+     
+    Das Application Programming Interface (API) ist eine Programmierschnittstelle, die den Zugriff auf Daten und Methoden der Deutschen Digitalen Bibliothek (DDB) ermöglicht. Sie erlaubt die Entwicklung vielfältiger Anwendungen, die die in der DDB vorgehaltenen Inhalte nutzen und sie jeweils nach den eigenen Wünschen darstellen und in unterschiedliche Kontexte einbetten. Das API steht allen Personen offen.
+    
+    
+    Für die Nutzung des Application Programming Interfaces der Deutschen Digitalen Bibliothek ist eine Authentifikation in Form eines Schlüssels (API Key) notwendig. Ein Authentifikationsschlüssel ist eine dem Nutzer eindeutig zugeordnete Zeichenfolge, die bei jeder Anfrage an das API zum Zwecke der Authentifikation mit zu übertragen ist. Authentifikationsschlüssel sind vertraulich und ausschließlich für die Verwendung durch den Nutzer bestimmt.
+    Sie dürfen nicht an Dritte weitergegeben werden, es sei denn mit ausdrücklicher schriftlicher Zustimmung der DDB.
+    
+    ## Wo finde ich meinen DDB-API-Key?
+    
+    Jeder registrierte Benutzer der Deutschen Digitalen Bibliothek kann sich einen Authentifizierungsschlüssel für die Verwendung des APIs erzeugen lassen. Dies erfolgt über das eigene Nutzerkonto im Bereich [„Meine DDB“](https://www.deutsche-digitale-bibliothek.de/login).
+    
+    
+    Die Software ist frei unter der [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)-Lizenz im [GitHub der DDB](https://github.com/Deutsche-Digitale-Bibliothek/ddb-backend) veröffentlicht.
+    
+    
+    **Author:** Patrick Dinger, Michael Büchner
+  contact:
+    name: Service Point of the German Digital Library
+    email: service@deutsche-digitale-bibliothek.de
+    url: 'https://pro.deutsche-digitale-bibliothek.de/node/530'
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  termsOfService: 'https://www.deutsche-digitale-bibliothek.de/content/impressum'
+servers:
+  - description: Production
+    url: 'https://api.deutsche-digitale-bibliothek.de/'
+  - description: Testing *Q1*
+    url: 'https://api-q1.deutsche-digitale-bibliothek.de/'
+  - description: Development (FIZ Karlsruhe)
+    url: 'https://dev-ddb.fiz-karlsruhe.de/api/'
+paths:
+  '/binary/{uuid}':
+    get:
+      operationId: getBinaryUuid
+      summary: The method binary returns the content of a binary file of an item for a given item-ID.
+      description: | 
+        To request a binary of an item, the given [UUID](https://de.wikipedia.org/wiki/Universally_Unique_Identifier) of the object is required. The uuid of a binary can be retrieved via the HTTPS-GET-request '/items/{id}/binaries'. This method provides response data as application/octet-stream. A binary file at DDB can be a picture, a tumbnail of a picture, a video clip, an audio file etc.
+        
+        To retrieve the UUID, you need to insert the ID of a DDB-Object. Depending on the way you like to access the DDB-API, you must choose the component "binaries" for the method "/items/{id}/component" first.
+        
+        It is possible to add any file extention to the uuid, which is ignored by the server, e.g. [`/binary/b59249a0-5c2d-4291-85d2-efb3554f786e.mp4`](https://api.deutsche-digitale-bibliothek.de/binary/b59249a0-5c2d-4291-85d2-efb3554f786e.mp4)
+      parameters:
+        - $ref: '#/components/parameters/uuid'
+        # Binary-Methode funktioniert nicht für Bilder
+      responses:
+        '200':
+          description: Success
+          content:
+            application/octet-stream:
+              schema:
+                type: object
+            '*/*':
+              schema:
+                type: object
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '413':
+          $ref: '#/components/responses/413'
+        '500':
+          $ref: '#/components/responses/500'
+      tags:
+        - binary
+  '/entities':
+    # Veraltet!
+    $ref: '#/paths/~1search~1person'
+  '/entities/facets':
+      # Veraltet!
+    $ref: '#/paths/~1search~1person~1facets'
+  '/entities/facets/{facetName}':
+      # Veraltet!
+    $ref: '#/paths/~1search~1person~1facets~1%7BfacetName%7D'
+  '/entities/facets/maxpages':
+      # Veraltet!
+    $ref: '#/paths/~1search~1person~1facets~1maxpages'
+  '/entities/sortcriteria':
+      # Veraltet!
+    $ref: '#/paths/~1search~1person~1sortcriteria'
+  '/entities/suggest':
+      # Veraltet!
+    $ref: '#/paths/~1search~1person~1suggest'
+  '/institutions':
+    get:
+      operationId: getInstitution
+      summary: Returns a list of institutions which are registered at the DDB
+      description: |
+        The JSON-Response contains an array of institution objects. Each object contains it’s display name, the internal cortex id, its geolocation in latitude and longitude and the sector it belongs to. The values for the sector are the same as returned by the sector facet. Each institution object may contain child institutions. These are nested into a property named children. This is an array containing institution JSON objects as described above. These institutions can again contain child institutions. If there are no child institutions the JSON array is empty.
+      parameters:
+        - in: query
+          name: hasItems
+          required: false
+          description: Show only institutions which have items
+          schema:
+            type: boolean
+            default: false
+        - in: query
+          name: sector
+          required: false
+          description: |
+            Show institutions of an specifiy cultural sector.
+
+            | Value    | Description         | URI                                    |
+            |----------|---------------------|----------------------------------------|
+            | *sec_01* | Archive             | http://ddb.vocnet.org/sparte/sparte001 |
+            | *sec_02* | Library             | http://ddb.vocnet.org/sparte/sparte002 |
+            | *sec_03* | Monument protection | http://ddb.vocnet.org/sparte/sparte003 |
+            | *sec_04* | Research            | http://ddb.vocnet.org/sparte/sparte004 |
+            | *sec_05* | Media               | http://ddb.vocnet.org/sparte/sparte005 |
+            | *sec_06* | Museum              | http://ddb.vocnet.org/sparte/sparte006 |
+            | *sec_07* | Other               | http://ddb.vocnet.org/sparte/sparte007 |
+          schema:
+            type: string
+            enum:
+              - sec_01
+              - sec_02
+              - sec_03
+              - sec_04
+              - sec_05
+              - sec_06
+              - sec_07
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - institutions
+  '/institutions/sectors':
+    get:
+      operationId: getInstitutionSector
+      summary: Returns the list of available institution sectors at the DDB
+      description: |
+        Each sector contains a name in the property value and the number of institutions that belong to this sector (count). As institutions can belong to multiple sectors, the overall sum of the different counts can be higher than the total number of institutions.
+        
+        A JSON array that lists all available sectors is returned. Each sector contains a name in the property value and the number of institutions that belong to this sector (count). As institutions can belong to multiple sectors the sum over the counts does not the total number of institutions.
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - institutions
+  '/institutions/map':
+    get:
+      operationId: getInstitutionMap
+      summary: TODO FIZ
+      description: TODO FIZ
+      parameters:
+        - in: query
+          name: clusterid
+          required: false
+          schema:
+            type: string
+            default: -1
+          description: TODO FIZ
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+          description: TODO FIZ
+        - in: query
+          name: length
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: -1
+          description: TODO FIZ
+        - in: query
+          name: hasItems
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: Show only institutions which have items
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - institutions
+  '/institutions/map/cluster':
+    get:
+      operationId: getInstitutionMapCluster
+      summary: ??? (TODO FIZ)
+      description: ??? (TODO FIZ)
+      parameters:
+        - in: query
+          name: zoomlevel
+          required: false
+          schema:
+            type: string
+          description: ??? (TODO FIZ)
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - institutions
+  '/items/{id}':
+    get:
+      operationId: getItemsId
+      summary: Returns the Archive Information Package (AIP) of a DDB item
+      description: |
+        An AIP contains all available information of an item including a persistent identifier.
+        
+        * TODO FIZ: Was ist der Unterschied zwischen hier und `/items/{id}/aip`?
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - items
+  '/items/{id}/{component}':
+    get:
+      operationId: getItemsIdComponent
+      summary: Returns a component of the Archive Information Package (AIP) of a DDB item
+      description: |
+        An AIP contains all available information of an item including a persistent identifier.
+        
+        * TODO FIZ: Was ist der Unterschied zwischen hier und `/items/{id}/aip`?
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - in: path
+          name: component
+          required: true
+          description: |
+            * TODO Michael
+            * TODO FIZ Die Methode source funktioniert nicht.
+            | Component            | Description                                                                                                                                                               |
+            |----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+            | *aip*                | An AIP contains all available information of an item including a persistent identifier.<br><br>**TODO** FIZ: Was ist der Unterschied zwischen hier und `/items/{id}`?     |
+            | *binaries*           |                                                                                                                                                                           |
+            | *children*           |                                                                                                                                                                           |
+            | *edm*                |                                                                                                                                                                           |
+            | *indexing-profile*   |                                                                                                                                                                           |
+            | *parent*             |                                                                                                                                                                           |
+            | *source*             |                                                                                                                                                                                                                                    |
+            | *view*               |                                                                                                                                                                           |
+        
+          schema:
+            type: string
+            enum:
+              - aip
+              - binaries
+              - children
+              - edm
+              - indexing-profile
+              - parent
+              - source
+              - view
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - items
+  '/items/{id}/source/{component}':
+    get:
+      operationId: getItemsIdSourceComponent
+      summary: Returns a subcomponent of the Archive Information Package (AIP) component `source` of a DDB item
+      description: |
+        Each DDB-Object has a source/description and a source/record. Normaly, the unmasked content (source/record) will be returend by the API. DDB-Objekte, die aus einem hierarchischen Datenformat entstanden sind, haben bis auf das Wurzelobjekt keinen source/record. In der source/description wird auf das Wurzelobjekt verwiesen. (Die API antwortet mit dem Status Code „303 See Other“, und der Location (API-URL) des Wurzelobjekts, die aus der source/desciption stammt.)
+        
+        TODO: Patrick
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - in: path
+          name: component
+          required: true
+          description: | 
+            Die Antworten dieser Methode fallen, jenachdem ob der Datenpartner bereits in einem  hierarchishen  Datenformat (METS/MODS, METS/TEI, EAD(DDB)) die Daten geliefert hat oder in einem nicht hierarischen (MARCXML, LIDO, denkXweb, ESE/DC, EDM) unterschiedlich aus. (MARCXML ist ein nicht-hierarchisches Datenformat, weil die einzelnen record auch losgelöst von der collection existieren können. MARCXML wird in der Regel als Collection geliefert und vor der Transformation/dem Ingest in einzelne Records zerlegt. Diese Record sind eigenständig und gegenüber dem Schema valide. Jeder Record (aus der Collection) wird im AIP des DDB-Objektes gespeichert. Die MARCXML-Collection als solche geht in der DDB verloren.)
+          schema:
+            type: string
+            enum:
+              - record
+              - description
+      responses:
+        '200':
+          description: Success
+          content:
+            application/xml:
+              schema:
+                type: object
+        '303':
+          description: See Other
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      tags:
+        - items
+  '/search':
+    get:
+      operationId: getSearch
+      summary: Interface to the search engine of the DDB
+      description: |
+        TODO Michael/Patrick
+        
+        The maximum count of rows is 1000.
+      parameters:
+        - $ref: '#/components/parameters/search_query'
+        - $ref: '#/components/parameters/search_facet'
+        - in: query
+          name: defaultOperator
+          schema:
+            type: string
+            description: TODO Michael Klären was das tut.
+        - $ref: '#/components/parameters/search_facet.limit'
+        - $ref: '#/components/parameters/search_minDocs'
+        - $ref: '#/components/parameters/search_offset'
+        - $ref: '#/components/parameters/search_rows'
+        - $ref: '#/components/parameters/search_sort'
+        - $ref: '#/components/parameters/search_cursorMark'
+        - $ref: '#/components/parameters/search_affiliate_fct'
+        - $ref: '#/components/parameters/search_apd_abstracts_fct'
+        - $ref: '#/components/parameters/search_apd_context_fct'
+        - $ref: '#/components/parameters/search_apd_document_type_fct'
+        - $ref: '#/components/parameters/search_apd_keywords_fct'
+        - $ref: '#/components/parameters/search_apd_level_of_description_fct'
+        - $ref: '#/components/parameters/search_apd_material_fct'
+        - $ref: '#/components/parameters/search_apd_provenance_fct'
+        - $ref: '#/components/parameters/search_apd_reference_number_fct'
+        - $ref: '#/components/parameters/search_apd_subject_fct'
+        - $ref: '#/components/parameters/search_digitalisattype_fct'
+        - $ref: '#/components/parameters/search_keywords_fct'
+        - $ref: '#/components/parameters/search_language_fct'
+        - $ref: '#/components/parameters/search_mimetype_fct'
+        - $ref: '#/components/parameters/search_objecttype_fct'
+        - $ref: '#/components/parameters/search_place_fct'
+        - $ref: '#/components/parameters/search_provider_fct'
+        - $ref: '#/components/parameters/search_sector_fct'
+        - $ref: '#/components/parameters/search_state_fct'
+        - $ref: '#/components/parameters/search_time_begin_fct'
+        - $ref: '#/components/parameters/search_time_end_fct'
+        - $ref: '#/components/parameters/search_time_fct'
+        - $ref: '#/components/parameters/search_topic_fct'
+        - $ref: '#/components/parameters/search_type_fct'
+        - $ref: '#/components/parameters/search_affiliate'
+        - $ref: '#/components/parameters/search_affiliate_fct_involved'
+        - $ref: '#/components/parameters/search_affiliate_fct_subject'
+        - $ref: '#/components/parameters/search_aggregation_field'
+        - $ref: '#/components/parameters/search_aggregator_id'
+        - $ref: '#/components/parameters/search_apd_abstracts'
+        - $ref: '#/components/parameters/search_apd_context'
+        - $ref: '#/components/parameters/search_apd_document_type'
+        - $ref: '#/components/parameters/search_apd_keywords'
+        - $ref: '#/components/parameters/search_apd_level_of_description'
+        - $ref: '#/components/parameters/search_apd_material'
+        - $ref: '#/components/parameters/search_apd_provenance'
+        - $ref: '#/components/parameters/search_apd_reference_number'
+        - $ref: '#/components/parameters/search_apd_subject'
+        - $ref: '#/components/parameters/search_apd_xml_sort'
+        - $ref: '#/components/parameters/search_atoz'
+        - $ref: '#/components/parameters/search_begin_time'
+        - $ref: '#/components/parameters/search_category'
+        - $ref: '#/components/parameters/search_content'
+        - $ref: '#/components/parameters/search_context'
+        - $ref: '#/components/parameters/search_dataset_id'
+        - $ref: '#/components/parameters/search_dataset_label'
+        - $ref: '#/components/parameters/search_description'
+        - $ref: '#/components/parameters/search_digitalCopyType'
+        - $ref: '#/components/parameters/search_digitalisat'
+        - $ref: '#/components/parameters/search_end_time'
+        - $ref: '#/components/parameters/search_fulltext'
+        - $ref: '#/components/parameters/search_fulltext_search'
+        - $ref: '#/components/parameters/search_geocode'
+        - $ref: '#/components/parameters/search_geocode_0_coordinate'
+        - $ref: '#/components/parameters/search_geocode_1_coordinate'
+        - $ref: '#/components/parameters/search_grid_preview'
+        - $ref: '#/components/parameters/search_hasItems'
+        - $ref: '#/components/parameters/search_id'
+        - $ref: '#/components/parameters/search_ingest_id'
+        - $ref: '#/components/parameters/search_institution_name'
+        - $ref: '#/components/parameters/search_keywords'
+        - $ref: '#/components/parameters/search_label'
+        - $ref: '#/components/parameters/search_language'
+        - $ref: '#/components/parameters/search_last_update'
+        - $ref: '#/components/parameters/search_license'
+        - $ref: '#/components/parameters/search_license_group'
+        - $ref: '#/components/parameters/search_mapping_version'
+        - $ref: '#/components/parameters/search_md_format'
+        - $ref: '#/components/parameters/search_objecttype'
+        - $ref: '#/components/parameters/search_place'
+        - $ref: '#/components/parameters/search_preview'
+        - $ref: '#/components/parameters/search_preview_store'
+        - $ref: '#/components/parameters/search_provider'
+        - $ref: '#/components/parameters/search_provider_id'
+        - $ref: '#/components/parameters/search_ranking'
+        - $ref: '#/components/parameters/search_revision_id'
+        - $ref: '#/components/parameters/search_sector'
+        - $ref: '#/components/parameters/search_signature'
+        - $ref: '#/components/parameters/search_sort_field'
+        - $ref: '#/components/parameters/search_source_format'
+        - $ref: '#/components/parameters/search_spell_check'
+        - $ref: '#/components/parameters/search_state'
+        - $ref: '#/components/parameters/search_subsector'
+        - $ref: '#/components/parameters/search_suggest_field'
+        - $ref: '#/components/parameters/search_suggest_field_apd'
+        - $ref: '#/components/parameters/search_supplier_id'
+        - $ref: '#/components/parameters/search_time'
+        - $ref: '#/components/parameters/search_title'
+        - $ref: '#/components/parameters/search_topic'
+        - $ref: '#/components/parameters/search_tp_category_id'
+        - $ref: '#/components/parameters/search_type'
+        - $ref: '#/components/parameters/search_view'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search
+  '/search/cluster':
+    get:
+      operationId: getSearchCluster
+      summary: TODO
+      description: ??? TODO FIZ Was tut das?
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      parameters:
+        # Inherit from /search
+        - $ref: '#/components/parameters/search_query'
+        - $ref: '#/components/parameters/search_facet'
+        - $ref: '#/components/parameters/search_facet.limit'
+        - $ref: '#/components/parameters/search_minDocs'
+        - $ref: '#/components/parameters/search_offset'
+        - $ref: '#/components/parameters/search_rows'
+        - $ref: '#/components/parameters/search_sort'
+        - $ref: '#/components/parameters/search_cursorMark'
+        - $ref: '#/components/parameters/search_affiliate_fct'
+        - $ref: '#/components/parameters/search_apd_abstracts_fct'
+        - $ref: '#/components/parameters/search_apd_context_fct'
+        - $ref: '#/components/parameters/search_apd_document_type_fct'
+        - $ref: '#/components/parameters/search_apd_keywords_fct'
+        - $ref: '#/components/parameters/search_apd_level_of_description_fct'
+        - $ref: '#/components/parameters/search_apd_material_fct'
+        - $ref: '#/components/parameters/search_apd_provenance_fct'
+        - $ref: '#/components/parameters/search_apd_reference_number_fct'
+        - $ref: '#/components/parameters/search_apd_subject_fct'
+        - $ref: '#/components/parameters/search_digitalisattype_fct'
+        - $ref: '#/components/parameters/search_keywords_fct'
+        - $ref: '#/components/parameters/search_language_fct'
+        - $ref: '#/components/parameters/search_mimetype_fct'
+        - $ref: '#/components/parameters/search_objecttype_fct'
+        - $ref: '#/components/parameters/search_place_fct'
+        - $ref: '#/components/parameters/search_provider_fct'
+        - $ref: '#/components/parameters/search_sector_fct'
+        - $ref: '#/components/parameters/search_state_fct'
+        - $ref: '#/components/parameters/search_time_begin_fct'
+        - $ref: '#/components/parameters/search_time_end_fct'
+        - $ref: '#/components/parameters/search_time_fct'
+        - $ref: '#/components/parameters/search_topic_fct'
+        - $ref: '#/components/parameters/search_type_fct'
+        - $ref: '#/components/parameters/search_affiliate'
+        - $ref: '#/components/parameters/search_affiliate_fct_involved'
+        - $ref: '#/components/parameters/search_affiliate_fct_subject'
+        - $ref: '#/components/parameters/search_aggregation_field'
+        - $ref: '#/components/parameters/search_aggregator_id'
+        - $ref: '#/components/parameters/search_apd_abstracts'
+        - $ref: '#/components/parameters/search_apd_context'
+        - $ref: '#/components/parameters/search_apd_document_type'
+        - $ref: '#/components/parameters/search_apd_keywords'
+        - $ref: '#/components/parameters/search_apd_level_of_description'
+        - $ref: '#/components/parameters/search_apd_material'
+        - $ref: '#/components/parameters/search_apd_provenance'
+        - $ref: '#/components/parameters/search_apd_reference_number'
+        - $ref: '#/components/parameters/search_apd_subject'
+        - $ref: '#/components/parameters/search_apd_xml_sort'
+        - $ref: '#/components/parameters/search_atoz'
+        - $ref: '#/components/parameters/search_begin_time'
+        - $ref: '#/components/parameters/search_category'
+        - $ref: '#/components/parameters/search_content'
+        - $ref: '#/components/parameters/search_context'
+        - $ref: '#/components/parameters/search_dataset_id'
+        - $ref: '#/components/parameters/search_dataset_label'
+        - $ref: '#/components/parameters/search_description'
+        - $ref: '#/components/parameters/search_digitalCopyType'
+        - $ref: '#/components/parameters/search_digitalisat'
+        - $ref: '#/components/parameters/search_end_time'
+        - $ref: '#/components/parameters/search_fulltext'
+        - $ref: '#/components/parameters/search_fulltext_search'
+        - $ref: '#/components/parameters/search_geocode'
+        - $ref: '#/components/parameters/search_geocode_0_coordinate'
+        - $ref: '#/components/parameters/search_geocode_1_coordinate'
+        - $ref: '#/components/parameters/search_grid_preview'
+        - $ref: '#/components/parameters/search_hasItems'
+        - $ref: '#/components/parameters/search_id'
+        - $ref: '#/components/parameters/search_ingest_id'
+        - $ref: '#/components/parameters/search_institution_name'
+        - $ref: '#/components/parameters/search_keywords'
+        - $ref: '#/components/parameters/search_label'
+        - $ref: '#/components/parameters/search_language'
+        - $ref: '#/components/parameters/search_last_update'
+        - $ref: '#/components/parameters/search_license'
+        - $ref: '#/components/parameters/search_license_group'
+        - $ref: '#/components/parameters/search_mapping_version'
+        - $ref: '#/components/parameters/search_md_format'
+        - $ref: '#/components/parameters/search_objecttype'
+        - $ref: '#/components/parameters/search_place'
+        - $ref: '#/components/parameters/search_preview'
+        - $ref: '#/components/parameters/search_preview_store'
+        - $ref: '#/components/parameters/search_provider'
+        - $ref: '#/components/parameters/search_provider_id'
+        - $ref: '#/components/parameters/search_ranking'
+        - $ref: '#/components/parameters/search_revision_id'
+        - $ref: '#/components/parameters/search_sector'
+        - $ref: '#/components/parameters/search_signature'
+        - $ref: '#/components/parameters/search_sort_field'
+        - $ref: '#/components/parameters/search_source_format'
+        - $ref: '#/components/parameters/search_spell_check'
+        - $ref: '#/components/parameters/search_state'
+        - $ref: '#/components/parameters/search_subsector'
+        - $ref: '#/components/parameters/search_suggest_field'
+        - $ref: '#/components/parameters/search_suggest_field_apd'
+        - $ref: '#/components/parameters/search_supplier_id'
+        - $ref: '#/components/parameters/search_time'
+        - $ref: '#/components/parameters/search_title'
+        - $ref: '#/components/parameters/search_topic'
+        - $ref: '#/components/parameters/search_tp_category_id'
+        - $ref: '#/components/parameters/search_type'
+        - $ref: '#/components/parameters/search_view'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search
+  '/search/facets':
+    get:
+      operationId: getSearchFacets
+      summary: Returns all available facets or all available facets of a specific type
+      description: |
+        TODO
+        
+        **TODO** FIZ: Warum geht das nicht?
+      parameters:
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+            enum:
+              - search
+              - extended
+              - technical
+          description: |
+            Facet type. If not selected all facets will be delivered.
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search
+  '/search/facets/{facetName}':
+    get:
+      operationId: getSearchFacetsFacetName
+      summary: Returns all facet values for a given facet
+      description: |
+        TODO
+        
+        TODO FIZ: Wie genau funktioniert das? Stimmt das so?
+      parameters:
+        - in: path
+          name: facetName
+          required: true
+          schema:
+            type: string
+            enum:
+              - affiliate_fct
+              - apd_abstracts_fct
+              - apd_context_fct
+              - apd_document_type_fct
+              - apd_keywords_fct
+              - apd_level_of_description_fct
+              - apd_material_fct
+              - apd_provenance_fct
+              - apd_reference_number_fct
+              - apd_subject_fct
+              - digitalisattype_fct
+              - keywords_fct
+              - language_fct
+              - mimetype_fct
+              - objecttype_fct
+              - place_fct
+              - provider_fct
+              - sector_fct
+              - state_fct
+              - time_begin_fct
+              - time_end_fct
+              - time_fct
+              - topic_fct
+              - type_fct
+              - affiliate
+              - affiliate_fct_involved
+              - affiliate_fct_subject
+              - aggregation_field
+              - aggregator_id
+              - apd_abstracts
+              - apd_context
+              - apd_document_type
+              - apd_keywords
+              - apd_level_of_description
+              - apd_material
+              - apd_provenance
+              - apd_reference_number
+              - apd_subject
+              - apd_xml_sort
+              - atoz
+              - begin_time
+              - category
+              - content
+              - context
+              - dataset_id
+              - dataset_label
+              - description
+              - digitalCopyType
+              - digitalisat
+              - end_time
+              - fulltext
+              - fulltext_search
+              - geocode
+              - geocode_0_coordinate
+              - geocode_1_coordinate
+              - grid_preview
+              - hasItems
+              - id
+              - ingest_id
+              - institution_name
+              - keywords
+              - label
+              - language
+              - last_update
+              - license
+              - license_group
+              - mapping_version
+              - md_format
+              - objecttype
+              - place
+              - preview
+              - preview_store
+              - provider
+              - provider_id
+              - ranking
+              - revision_id
+              - sector
+              - signature
+              - sort_field
+              - source_format
+              - spell_check
+              - state
+              - subsector
+              - suggest_field
+              - suggest_field_apd
+              - supplier_id
+              - time
+              - title
+              - topic
+              - tp_category_id
+              - type
+              - view
+          description: Name of the facet which should be searched.
+        - in: query
+          name: searchQuery
+          required: false
+          schema:
+            type: string
+          description: ???
+        # Inherit from /search
+        - $ref: '#/components/parameters/search_query'
+        - $ref: '#/components/parameters/search_facet'
+        - $ref: '#/components/parameters/search_facet.limit'
+        - $ref: '#/components/parameters/search_minDocs'
+        - $ref: '#/components/parameters/search_offset'
+        - $ref: '#/components/parameters/search_rows'
+        - $ref: '#/components/parameters/search_sort'
+        - $ref: '#/components/parameters/search_cursorMark'
+        - $ref: '#/components/parameters/search_affiliate_fct'
+        - $ref: '#/components/parameters/search_apd_abstracts_fct'
+        - $ref: '#/components/parameters/search_apd_context_fct'
+        - $ref: '#/components/parameters/search_apd_document_type_fct'
+        - $ref: '#/components/parameters/search_apd_keywords_fct'
+        - $ref: '#/components/parameters/search_apd_level_of_description_fct'
+        - $ref: '#/components/parameters/search_apd_material_fct'
+        - $ref: '#/components/parameters/search_apd_provenance_fct'
+        - $ref: '#/components/parameters/search_apd_reference_number_fct'
+        - $ref: '#/components/parameters/search_apd_subject_fct'
+        - $ref: '#/components/parameters/search_digitalisattype_fct'
+        - $ref: '#/components/parameters/search_keywords_fct'
+        - $ref: '#/components/parameters/search_language_fct'
+        - $ref: '#/components/parameters/search_mimetype_fct'
+        - $ref: '#/components/parameters/search_objecttype_fct'
+        - $ref: '#/components/parameters/search_place_fct'
+        - $ref: '#/components/parameters/search_provider_fct'
+        - $ref: '#/components/parameters/search_sector_fct'
+        - $ref: '#/components/parameters/search_state_fct'
+        - $ref: '#/components/parameters/search_time_begin_fct'
+        - $ref: '#/components/parameters/search_time_end_fct'
+        - $ref: '#/components/parameters/search_time_fct'
+        - $ref: '#/components/parameters/search_topic_fct'
+        - $ref: '#/components/parameters/search_type_fct'
+        - $ref: '#/components/parameters/search_affiliate'
+        - $ref: '#/components/parameters/search_affiliate_fct_involved'
+        - $ref: '#/components/parameters/search_affiliate_fct_subject'
+        - $ref: '#/components/parameters/search_aggregation_field'
+        - $ref: '#/components/parameters/search_aggregator_id'
+        - $ref: '#/components/parameters/search_apd_abstracts'
+        - $ref: '#/components/parameters/search_apd_context'
+        - $ref: '#/components/parameters/search_apd_document_type'
+        - $ref: '#/components/parameters/search_apd_keywords'
+        - $ref: '#/components/parameters/search_apd_level_of_description'
+        - $ref: '#/components/parameters/search_apd_material'
+        - $ref: '#/components/parameters/search_apd_provenance'
+        - $ref: '#/components/parameters/search_apd_reference_number'
+        - $ref: '#/components/parameters/search_apd_subject'
+        - $ref: '#/components/parameters/search_apd_xml_sort'
+        - $ref: '#/components/parameters/search_atoz'
+        - $ref: '#/components/parameters/search_begin_time'
+        - $ref: '#/components/parameters/search_category'
+        - $ref: '#/components/parameters/search_content'
+        - $ref: '#/components/parameters/search_context'
+        - $ref: '#/components/parameters/search_dataset_id'
+        - $ref: '#/components/parameters/search_dataset_label'
+        - $ref: '#/components/parameters/search_description'
+        - $ref: '#/components/parameters/search_digitalCopyType'
+        - $ref: '#/components/parameters/search_digitalisat'
+        - $ref: '#/components/parameters/search_end_time'
+        - $ref: '#/components/parameters/search_fulltext'
+        - $ref: '#/components/parameters/search_fulltext_search'
+        - $ref: '#/components/parameters/search_geocode'
+        - $ref: '#/components/parameters/search_geocode_0_coordinate'
+        - $ref: '#/components/parameters/search_geocode_1_coordinate'
+        - $ref: '#/components/parameters/search_grid_preview'
+        - $ref: '#/components/parameters/search_hasItems'
+        - $ref: '#/components/parameters/search_id'
+        - $ref: '#/components/parameters/search_ingest_id'
+        - $ref: '#/components/parameters/search_institution_name'
+        - $ref: '#/components/parameters/search_keywords'
+        - $ref: '#/components/parameters/search_label'
+        - $ref: '#/components/parameters/search_language'
+        - $ref: '#/components/parameters/search_last_update'
+        - $ref: '#/components/parameters/search_license'
+        - $ref: '#/components/parameters/search_license_group'
+        - $ref: '#/components/parameters/search_mapping_version'
+        - $ref: '#/components/parameters/search_md_format'
+        - $ref: '#/components/parameters/search_objecttype'
+        - $ref: '#/components/parameters/search_place'
+        - $ref: '#/components/parameters/search_preview'
+        - $ref: '#/components/parameters/search_preview_store'
+        - $ref: '#/components/parameters/search_provider'
+        - $ref: '#/components/parameters/search_provider_id'
+        - $ref: '#/components/parameters/search_ranking'
+        - $ref: '#/components/parameters/search_revision_id'
+        - $ref: '#/components/parameters/search_sector'
+        - $ref: '#/components/parameters/search_signature'
+        - $ref: '#/components/parameters/search_sort_field'
+        - $ref: '#/components/parameters/search_source_format'
+        - $ref: '#/components/parameters/search_spell_check'
+        - $ref: '#/components/parameters/search_state'
+        - $ref: '#/components/parameters/search_subsector'
+        - $ref: '#/components/parameters/search_suggest_field'
+        - $ref: '#/components/parameters/search_suggest_field_apd'
+        - $ref: '#/components/parameters/search_supplier_id'
+        - $ref: '#/components/parameters/search_time'
+        - $ref: '#/components/parameters/search_title'
+        - $ref: '#/components/parameters/search_topic'
+        - $ref: '#/components/parameters/search_tp_category_id'
+        - $ref: '#/components/parameters/search_type'
+        - $ref: '#/components/parameters/search_view'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search
+  '/search/facets/maxpages':
+    get:
+      operationId: getSearchFacetsMaxpage
+      summary: TODO
+      description: TODO FIZ (Wofür ist das?)
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search
+  '/search/mlt':
+    get:
+      operationId: getSearchMlt
+      summary: Returns similar documents for a given object
+      description: |
+        **More like this.** Returns a set of documents regarding a specific document defined by a search query. An Exemple for this method is the query
+        ```
+        Get
+        /search/mlt?facet=id&id=JGTOPO2Z3KXX7UHSTQW6EORRN3R5W3UG&fields=place,title
+        Host: api.deutsche-digitale-bibliothek.de
+        Accept: */*
+        ```
+        This query will provide similar documents regarding a document with the ID JGTOPO2Z3KXX7UHSTQW6EORRN3R5W3UG based on the information of its *place* and *affiliate* facets. It only return two documents beginning with the third one in list.
+      parameters:
+        # Method specific
+        - name: fields
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: |
+            Index fields which will be used for comparison and obtaining similar documents
+        # Inherit from /search
+        - $ref: '#/components/parameters/search_query'
+        - $ref: '#/components/parameters/search_offset'
+        - $ref: '#/components/parameters/search_rows'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search
+  '/search/sortcriteria':
+    get:
+      operationId: getSearchSortcriteria
+      summary: Returns the available sort criteria and the default criterion of the search result sets
+      description: |
+        TODO
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search
+  '/search/suggest':
+    get:
+      operationId: getSearchSuggest
+      summary: Returns suggestions for a given query
+      description: |
+        TODO
+        
+        TODO FIZ: Das scheint nicht zu gehen? Warum? Was macht das?
+      parameters:
+        - $ref: '#/components/parameters/search_query'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search
+  '/search/person':
+    get:
+      operationId: getSearchPerson
+      summary: Access to the the SOLR/Lucene search index of persons
+      description: |
+        TODO
+      parameters:
+        - $ref: '#/components/parameters/search_query'
+        - $ref: '#/components/parameters/search_person_facet'
+        - $ref: '#/components/parameters/search_facet.limit'
+        - $ref: '#/components/parameters/search_minDocs'
+        - $ref: '#/components/parameters/search_offset'
+        - $ref: '#/components/parameters/search_rows'
+        - $ref: '#/components/parameters/search_sort'
+        - $ref: '#/components/parameters/search_cursorMark'
+        # Facet query parameters
+        - $ref: '#/components/parameters/search_person_id'
+        - $ref: '#/components/parameters/search_person_preferredName'
+        - $ref: '#/components/parameters/search_person_count'
+        - $ref: '#/components/parameters/search_person_count_sec_01'
+        - $ref: '#/components/parameters/search_person_count_sec_02'
+        - $ref: '#/components/parameters/search_person_count_sec_03'
+        - $ref: '#/components/parameters/search_person_count_sec_04'
+        - $ref: '#/components/parameters/search_person_count_sec_05'
+        - $ref: '#/components/parameters/search_person_count_sec_06'
+        - $ref: '#/components/parameters/search_person_count_sec_07'
+        - $ref: '#/components/parameters/search_person_type'
+        - $ref: '#/components/parameters/search_person_dateOfBirth_de'
+        - $ref: '#/components/parameters/search_person_dateOfDeath_de'
+        - $ref: '#/components/parameters/search_person_dateOfBirth_en'
+        - $ref: '#/components/parameters/search_person_dateOfDeath_en'
+        - $ref: '#/components/parameters/search_person_variantName'
+        - $ref: '#/components/parameters/search_person_variant_id'
+        - $ref: '#/components/parameters/search_person_professionOrOccupation'
+        - $ref: '#/components/parameters/search_person_placeOfBirth'
+        - $ref: '#/components/parameters/search_person_placeOfDeath'
+        - $ref: '#/components/parameters/search_person_thumbnail'
+        - $ref: '#/components/parameters/search_person_person_occupation_fct'
+        - $ref: '#/components/parameters/search_person_person_place_fct'
+        - $ref: '#/components/parameters/search_person_person_name_fct'
+        - $ref: '#/components/parameters/search_person_person_gender_fct'
+        - $ref: '#/components/parameters/search_person_suggest_field'
+        - $ref: '#/components/parameters/search_person_wildcard_fulltext'
+        - $ref: '#/components/parameters/search_person_last_update'
+        - $ref: '#/components/parameters/search_person_spell_check'
+        - $ref: '#/components/parameters/search_person_sort_field'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search/person
+  '/search/person/facets':
+    get:
+      operationId: getSearchPersonFacets
+      summary: TODO
+      description: TODO
+      parameters:
+        - $ref: '#/components/parameters/type'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search/person
+  '/search/person/facets/{facetName}':
+    get:
+      operationId: getSearchPersonFacetsFacetName
+      summary: TODO
+      description: TODO
+      parameters:
+        - in: path
+          name: facetName
+          required: true
+          schema:
+            type: string
+            enum:
+              - id
+              - preferredName
+              - count
+              - count_sec_01
+              - count_sec_02
+              - count_sec_03
+              - count_sec_04
+              - count_sec_05
+              - count_sec_06
+              - count_sec_07
+              - type
+              - dateOfBirth_de
+              - dateOfDeath_de
+              - dateOfBirth_en
+              - dateOfDeath_en
+              - variantName
+              - variant_id
+              - professionOrOccupation
+              - placeOfBirth
+              - placeOfDeath
+              - thumbnail
+              - person_occupation_fct
+              - person_place_fct
+              - person_name_fct
+              - person_gender_fct
+              - suggest_field
+              - wildcard_fulltext
+              - last_update
+              - spell_check
+              - sort_field
+          description: Name of the facet which should be searched.
+        - in: query
+          name: searchQuery
+          required: false
+          schema:
+            type: string
+          description: ???
+        # Inherit from /search/person
+        - $ref: '#/components/parameters/search_query'
+        - $ref: '#/components/parameters/search_person_facet'
+        - $ref: '#/components/parameters/search_facet.limit'
+        - $ref: '#/components/parameters/search_minDocs'
+        - $ref: '#/components/parameters/search_offset'
+        - $ref: '#/components/parameters/search_rows'
+        - $ref: '#/components/parameters/search_sort'
+        - $ref: '#/components/parameters/search_cursorMark'
+        # Facet query parameters
+        - $ref: '#/components/parameters/search_person_id'
+        - $ref: '#/components/parameters/search_person_preferredName'
+        - $ref: '#/components/parameters/search_person_count'
+        - $ref: '#/components/parameters/search_person_count_sec_01'
+        - $ref: '#/components/parameters/search_person_count_sec_02'
+        - $ref: '#/components/parameters/search_person_count_sec_03'
+        - $ref: '#/components/parameters/search_person_count_sec_04'
+        - $ref: '#/components/parameters/search_person_count_sec_05'
+        - $ref: '#/components/parameters/search_person_count_sec_06'
+        - $ref: '#/components/parameters/search_person_count_sec_07'
+        - $ref: '#/components/parameters/search_person_type'
+        - $ref: '#/components/parameters/search_person_dateOfBirth_de'
+        - $ref: '#/components/parameters/search_person_dateOfDeath_de'
+        - $ref: '#/components/parameters/search_person_dateOfBirth_en'
+        - $ref: '#/components/parameters/search_person_dateOfDeath_en'
+        - $ref: '#/components/parameters/search_person_variantName'
+        - $ref: '#/components/parameters/search_person_variant_id'
+        - $ref: '#/components/parameters/search_person_professionOrOccupation'
+        - $ref: '#/components/parameters/search_person_placeOfBirth'
+        - $ref: '#/components/parameters/search_person_placeOfDeath'
+        - $ref: '#/components/parameters/search_person_thumbnail'
+        - $ref: '#/components/parameters/search_person_person_occupation_fct'
+        - $ref: '#/components/parameters/search_person_person_place_fct'
+        - $ref: '#/components/parameters/search_person_person_name_fct'
+        - $ref: '#/components/parameters/search_person_person_gender_fct'
+        - $ref: '#/components/parameters/search_person_suggest_field'
+        - $ref: '#/components/parameters/search_person_wildcard_fulltext'
+        - $ref: '#/components/parameters/search_person_last_update'
+        - $ref: '#/components/parameters/search_person_spell_check'
+        - $ref: '#/components/parameters/search_person_sort_field'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search/person
+  '/search/person/facets/maxpages':
+    get:
+      operationId: getSearchPersonFacetsMaxpages
+      summary: TODO
+      description: TODO
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search/person
+  '/search/person/sortcriteria':
+    get:
+      operationId: getSearchPersonSortcriteria
+      summary: TODO
+      description: TODO
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search/person
+  '/search/person/suggest':
+    get:
+      operationId: getSearchPersonSuggest
+      summary: TODO
+      description: |
+        TODO
+        
+        TODO FIZ: Das scheint nicht zu gehen? Warum? Was macht das?
+      parameters:
+        - $ref: '#/components/parameters/search_query'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search/person
+  '/version':
+    get:
+      operationId: getVersion
+      summary: Returns the version of DDB-Backend
+      description: This method shows the version of DDB's backend software. #(TODO Should be version of the API!)
+      responses:
+        '200':
+            description: Success. Version der Backend-Software Cortex.
+            content:
+              '*/*':
+                schema:
+                  type: string
+        '403':
+          $ref: '#/components/responses/403'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - version
+  '/search/organization':
+    get:
+      operationId: getSearchOrganization
+      summary: Access to the Lucene search index of organizations
+      description: TODO
+      parameters:
+        - $ref: '#/components/parameters/search_query'
+        - $ref: '#/components/parameters/search_organization_facet'
+        - $ref: '#/components/parameters/search_facet.limit'
+        - $ref: '#/components/parameters/search_minDocs'
+        - $ref: '#/components/parameters/search_offset'
+        - $ref: '#/components/parameters/search_rows'
+        - $ref: '#/components/parameters/search_sort'
+        - $ref: '#/components/parameters/search_cursorMark'
+        # Facet query parameters
+        - $ref: '#/components/parameters/search_organization_id'
+        - $ref: '#/components/parameters/search_organization_variant_id'
+        - $ref: '#/components/parameters/search_organization_ddb_organization_id'
+        - $ref: '#/components/parameters/search_organization_thumbnail'
+        - $ref: '#/components/parameters/search_organization_type'
+        - $ref: '#/components/parameters/search_organization_count'
+        - $ref: '#/components/parameters/search_organization_count_sec_01'
+        - $ref: '#/components/parameters/search_organization_count_sec_02'
+        - $ref: '#/components/parameters/search_organization_count_sec_03'
+        - $ref: '#/components/parameters/search_organization_count_sec_04'
+        - $ref: '#/components/parameters/search_organization_count_sec_05'
+        - $ref: '#/components/parameters/search_organization_count_sec_06'
+        - $ref: '#/components/parameters/search_organization_count_sec_07'
+        - $ref: '#/components/parameters/search_organization_label'
+        - $ref: '#/components/parameters/search_organization_description'
+        - $ref: '#/components/parameters/search_organization_subsector_fct'
+        - $ref: '#/components/parameters/search_organization_sector_fct'
+        - $ref: '#/components/parameters/search_organization_topic_fct'
+        - $ref: '#/components/parameters/search_organization_state_fct'
+        - $ref: '#/components/parameters/search_organization_city_fct'
+        - $ref: '#/components/parameters/search_organization_city_de_fct'
+        - $ref: '#/components/parameters/search_organization_city_en_fct'
+        - $ref: '#/components/parameters/search_organization_state_de_fct'
+        - $ref: '#/components/parameters/search_organization_state_en_fct'
+        - $ref: '#/components/parameters/search_organization_sublabel_fct'
+        - $ref: '#/components/parameters/search_organization_preferredName'
+        - $ref: '#/components/parameters/search_organization_variantName'
+        - $ref: '#/components/parameters/search_organization_topic'
+        - $ref: '#/components/parameters/search_organization_state'
+        - $ref: '#/components/parameters/search_organization_city'
+        - $ref: '#/components/parameters/search_organization_city_de'
+        - $ref: '#/components/parameters/search_organization_city_en'
+        - $ref: '#/components/parameters/search_organization_state_de'
+        - $ref: '#/components/parameters/search_organization_state_en'
+        - $ref: '#/components/parameters/search_organization_sublabel'
+        - $ref: '#/components/parameters/search_organization_revision_id'
+        - $ref: '#/components/parameters/search_organization_dataset_id'
+        - $ref: '#/components/parameters/search_organization_atoz'
+        - $ref: '#/components/parameters/search_organization_subsector'
+        - $ref: '#/components/parameters/search_organization_hasItems'
+        - $ref: '#/components/parameters/search_organization_geocode'
+        - $ref: '#/components/parameters/search_organization_geocode_0_coordinate'
+        - $ref: '#/components/parameters/search_organization_geocode_1_coordinate'
+        - $ref: '#/components/parameters/search_organization_location_display_name'
+        - $ref: '#/components/parameters/search_organization_parent_id'
+        - $ref: '#/components/parameters/search_organization_parent_organization_id'
+        - $ref: '#/components/parameters/search_organization_suggest_field'
+        - $ref: '#/components/parameters/search_organization_wildcard_fulltext'
+        - $ref: '#/components/parameters/search_organization_last_update'
+        - $ref: '#/components/parameters/search_organization_spell_check'
+        - $ref: '#/components/parameters/search_organization_sort_field'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search/organization
+  '/search/organization/facets':
+    get:
+      operationId: getSearchOrganizationFacets
+      summary: TODO
+      description: TODO
+      parameters:
+        - $ref: '#/components/parameters/type'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search/organization
+  '/search/organization/facets/{facetName}':
+    get:
+      operationId: getSearchOrganizationFacetsFacetName
+      summary: TODO
+      description: TODO
+      parameters:
+        - in: path
+          name: facetName
+          required: true
+          schema:
+            type: string
+            enum:
+              - id
+              - variant_id
+              - ddb_organization_id
+              - thumbnail
+              - type
+              - count
+              - count_sec_01
+              - count_sec_02
+              - count_sec_03
+              - count_sec_04
+              - count_sec_05
+              - count_sec_06
+              - count_sec_07
+              - label
+              - description
+              - subsector_fct
+              - sector_fct
+              - topic_fct
+              - state_fct
+              - city_fct
+              - city_de_fct
+              - city_en_fct
+              - state_de_fct
+              - state_en_fct
+              - sublabel_fct
+              - preferredName
+              - variantName
+              - topic
+              - state
+              - city
+              - city_de
+              - city_en
+              - state_de
+              - state_en
+              - sublabel
+              - revision_id
+              - dataset_id
+              - atoz
+              - subsector
+              - hasItems
+              - geocode
+              - geocode_0_coordinate
+              - geocode_1_coordinate
+              - location_display_name
+              - parent_id
+              - parent_organization_id
+              - suggest_field
+              - wildcard_fulltext
+              - last_update
+              - spell_check
+              - sort_field
+          description: Name of the facet which should be searched.
+        - in: query
+          name: searchQuery
+          required: false
+          schema:
+            type: string
+          description: ???
+        # Inherit from /search/organization
+        - $ref: '#/components/parameters/search_query'
+        - $ref: '#/components/parameters/search_organization_facet'
+        - $ref: '#/components/parameters/search_facet.limit'
+        - $ref: '#/components/parameters/search_minDocs'
+        - $ref: '#/components/parameters/search_offset'
+        - $ref: '#/components/parameters/search_rows'
+        - $ref: '#/components/parameters/search_sort'
+        - $ref: '#/components/parameters/search_cursorMark'
+        # Facet query parameters
+        - $ref: '#/components/parameters/search_organization_id'
+        - $ref: '#/components/parameters/search_organization_variant_id'
+        - $ref: '#/components/parameters/search_organization_ddb_organization_id'
+        - $ref: '#/components/parameters/search_organization_thumbnail'
+        - $ref: '#/components/parameters/search_organization_type'
+        - $ref: '#/components/parameters/search_organization_count'
+        - $ref: '#/components/parameters/search_organization_count_sec_01'
+        - $ref: '#/components/parameters/search_organization_count_sec_02'
+        - $ref: '#/components/parameters/search_organization_count_sec_03'
+        - $ref: '#/components/parameters/search_organization_count_sec_04'
+        - $ref: '#/components/parameters/search_organization_count_sec_05'
+        - $ref: '#/components/parameters/search_organization_count_sec_06'
+        - $ref: '#/components/parameters/search_organization_count_sec_07'
+        - $ref: '#/components/parameters/search_organization_label'
+        - $ref: '#/components/parameters/search_organization_description'
+        - $ref: '#/components/parameters/search_organization_subsector_fct'
+        - $ref: '#/components/parameters/search_organization_sector_fct'
+        - $ref: '#/components/parameters/search_organization_topic_fct'
+        - $ref: '#/components/parameters/search_organization_state_fct'
+        - $ref: '#/components/parameters/search_organization_city_fct'
+        - $ref: '#/components/parameters/search_organization_city_de_fct'
+        - $ref: '#/components/parameters/search_organization_city_en_fct'
+        - $ref: '#/components/parameters/search_organization_state_de_fct'
+        - $ref: '#/components/parameters/search_organization_state_en_fct'
+        - $ref: '#/components/parameters/search_organization_sublabel_fct'
+        - $ref: '#/components/parameters/search_organization_preferredName'
+        - $ref: '#/components/parameters/search_organization_variantName'
+        - $ref: '#/components/parameters/search_organization_topic'
+        - $ref: '#/components/parameters/search_organization_state'
+        - $ref: '#/components/parameters/search_organization_city'
+        - $ref: '#/components/parameters/search_organization_city_de'
+        - $ref: '#/components/parameters/search_organization_city_en'
+        - $ref: '#/components/parameters/search_organization_state_de'
+        - $ref: '#/components/parameters/search_organization_state_en'
+        - $ref: '#/components/parameters/search_organization_sublabel'
+        - $ref: '#/components/parameters/search_organization_revision_id'
+        - $ref: '#/components/parameters/search_organization_dataset_id'
+        - $ref: '#/components/parameters/search_organization_atoz'
+        - $ref: '#/components/parameters/search_organization_subsector'
+        - $ref: '#/components/parameters/search_organization_hasItems'
+        - $ref: '#/components/parameters/search_organization_geocode'
+        - $ref: '#/components/parameters/search_organization_geocode_0_coordinate'
+        - $ref: '#/components/parameters/search_organization_geocode_1_coordinate'
+        - $ref: '#/components/parameters/search_organization_location_display_name'
+        - $ref: '#/components/parameters/search_organization_parent_id'
+        - $ref: '#/components/parameters/search_organization_parent_organization_id'
+        - $ref: '#/components/parameters/search_organization_suggest_field'
+        - $ref: '#/components/parameters/search_organization_wildcard_fulltext'
+        - $ref: '#/components/parameters/search_organization_last_update'
+        - $ref: '#/components/parameters/search_organization_spell_check'
+        - $ref: '#/components/parameters/search_organization_sort_field'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search/organization
+  '/search/organization/facets/maxpages':
+    get:
+      operationId: getSearchOrganizationFacetsMaxpages
+      summary: TODO
+      description: TODO
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search/organization
+  '/search/organization/sortcriteria':
+    get:
+      operationId: getSearchOrganizationSortcriteria
+      summary: TODO
+      description: TODO
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search/organization
+  '/search/organization/suggest':
+    get:
+      operationId: getSearchOrganizationSuggest
+      summary: TODO
+      description: |
+        TODO
+        
+        TODO FIZ: Das scheint nicht zu gehen? Warum? Was macht das?
+      parameters:
+        - $ref: '#/components/parameters/search_query'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - search/organization
+components:
+  parameters:
+    id:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        maxLength: 32
+        minLength: 32
+      description: |
+        ID of DDB item which is a BASE32 encoded SHA1 hash value.
+        
+        See [https://pro.deutsche-digitale-bibliothek.de/node/782](https://pro.deutsche-digitale-bibliothek.de/node/782)
+    search_query:
+      in: query
+      name: query
+      required: true
+      schema:
+        type: string
+        nullable: true
+        default: '*'
+      description: |
+        Term(s) to be searched. Must be URL-encoded and compliant to the SOLR Query Syntax.
+    search_facet:
+      in: query
+      name: facet
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          nullable: true
+          enum:
+            - affiliate_fct
+            - apd_abstracts_fct
+            - apd_context_fct
+            - apd_document_type_fct
+            - apd_keywords_fct
+            - apd_level_of_description_fct
+            - apd_material_fct
+            - apd_provenance_fct
+            - apd_reference_number_fct
+            - apd_subject_fct
+            - digitalisattype_fct
+            - keywords_fct
+            - language_fct
+            - mimetype_fct
+            - objecttype_fct
+            - place_fct
+            - provider_fct
+            - sector_fct
+            - state_fct
+            - time_begin_fct
+            - time_end_fct
+            - time_fct
+            - topic_fct
+            - type_fct
+            - affiliate
+            - affiliate_fct_involved
+            - affiliate_fct_subject
+            - aggregation_field
+            - aggregator_id
+            - apd_abstracts
+            - apd_context
+            - apd_document_type
+            - apd_keywords
+            - apd_level_of_description
+            - apd_material
+            - apd_provenance
+            - apd_reference_number
+            - apd_subject
+            - apd_xml_sort
+            - atoz
+            - begin_time
+            - category
+            - content
+            - context
+            - dataset_id
+            - dataset_label
+            - description
+            - digitalCopyType
+            - digitalisat
+            - end_time
+            - fulltext
+            - fulltext_search
+            - geocode
+            - geocode_0_coordinate
+            - geocode_1_coordinate
+            - grid_preview
+            - hasItems
+            - id
+            - ingest_id
+            - institution_name
+            - keywords
+            - label
+            - language
+            - last_update
+            - license
+            - license_group
+            - mapping_version
+            - md_format
+            - objecttype
+            - place
+            - preview
+            - preview_store
+            - provider
+            - provider_id
+            - ranking
+            - revision_id
+            - sector
+            - signature
+            - sort_field
+            - source_format
+            - spell_check
+            - state
+            - subsector
+            - suggest_field
+            - suggest_field_apd
+            - supplier_id
+            - time
+            - title
+            - topic
+            - tp_category_id
+            - type
+            - view
+      description: |
+        This is the name of a facet which will be taken into account. Only facets which are supplied via a query parameter will be included into the result.
+        
+        * *affiliate_fct:*
+        * *apd_abstracts_fct:* See *apd_abstracts*.
+        * *apd_context_fct:* See *apd_context*.
+        * *apd_document_type_fct:* See *apd_document_type*.
+        * *apd_keywords_fct:* See *apd_keywords*.
+        * *apd_level_of_description_fct:* See apd_level_of_description.
+        * *apd_material_fct:* See *apd_material*.
+        * *apd_provenance_fct:* See *apd_provenance*.
+        * *apd_reference_number_fct:* See *apd_reference_number*.
+        * *apd_subject_fct:* See *apd_subject*.
+        * *digitalisattype_fct:*
+        * *keywords_fct:*
+        * *language_fct:*
+        * *mimetype_fct:*
+        * *objecttype_fct:*
+        * *place_fct:*
+        * *provider_fct:*
+        * *sector_fct:*
+        * *state_fct:*
+        * *time_begin_fct:*
+        * *time_end_fct:*
+        * *time_fct:*
+        * *topic_fct:*
+        * *type_fct:*
+        * *affiliate:* See *affiliate_fct*.
+        * *affiliate_fct_involved:*
+        * *affiliate_fct_subject:*
+        * *aggregation_field:*
+        * *aggregator_id:*
+        * *apd_abstracts:*
+        * *apd_context:*
+        * *apd_document_type:*
+        * *apd_keywords:*
+        * *apd_level_of_description: *
+        * *apd_material:*
+        * *apd_provenance:*
+        * *apd_reference_number:*
+        * *apd_subject:*
+        * *apd_xml_sort:*
+        * *atoz:*
+        * *begin_time:*
+        * *category:*
+        * *content:*
+        * *context:*
+        * *dataset_id:*
+        * *dataset_label:*
+        * *description: *
+        * *digitalCopyType:*
+        * *digitalisat:*
+        * *end_time:*
+        * *fulltext:*
+        * *fulltext_search:*
+        * *geocode:*
+        * *geocode_0_coordinate:*
+        * *geocode_1_coordinate:*
+        * *grid_preview:*
+        * *hasItems:*
+        * *id:*
+        * *ingest_id:*
+        * *institution_name:*
+        * *keywords:* See *keywords_fct*.
+        * *label:*
+        * *language:* See *language_fct*.
+        * *last_update:*
+        * *license:*
+        * *license_group:*
+        * *mapping_version:*
+        * *md_format:*
+        * *objecttype:* See *objecttype_fct*.
+        * *place:* See *place_fct*.
+        * *preview:*
+        * *preview_store:*
+        * *provider:* See *provider_fct*.
+        * *provider_id:*
+        * *ranking:*
+        * *revision_id:*
+        * *sector:* See *sector_fct*.
+        * *signature:*
+        * *sort_field:*
+        * *source_format:*
+        * *spell_check:*
+        * *state:* See *state_fct*.
+        * *subsector:*
+        * *suggest_field:*
+        * *suggest_field_apd:*
+        * *supplier_id:*
+        * *time:* See *time_fct*.
+        * *title:*
+        * *topic:* See *topic_fct*.
+        * *tp_category_id:*
+        * *type:* See *type_fct*.
+        * *view:*
+    search_affiliate_fct:
+      in: query
+      name: affiliate_fct
+      schema:
+        type: string
+      description: |
+        If *affiliate_fct* is selected in `facet` then this query parameter should have a query value.
+    search_apd_abstracts_fct:
+      in: query
+      name: apd_abstracts_fct
+      schema:
+        $ref: '#/components/parameters/search_apd_abstracts/schema'
+      description: 
+        $ref: '#/components/parameters/search_apd_abstracts/description'
+    search_apd_context_fct:
+      in: query
+      name: apd_context_fct
+      schema:
+        $ref: '#/components/parameters/search_apd_context/schema'
+      description: 
+        $ref: '#/components/parameters/search_apd_context/description'
+    search_apd_document_type_fct:
+      in: query
+      name: apd_document_type_fct
+      schema:
+        $ref: '#/components/parameters/search_apd_document_type/schema'
+      description: 
+        $ref: '#/components/parameters/search_apd_document_type/description'
+    search_apd_keywords_fct:
+      in: query
+      name: apd_keywords_fct
+      schema:
+        $ref: '#/components/parameters/search_apd_keywords/schema'
+      description: 
+        $ref: '#/components/parameters/search_apd_keywords/description'
+    search_apd_level_of_description_fct:
+      in: query
+      name: apd_level_of_description_fct
+      schema:
+        $ref: '#/components/parameters/search_apd_level_of_description/schema'
+      description: 
+        $ref: '#/components/parameters/search_apd_level_of_description/description'
+    search_apd_material_fct:
+      in: query
+      name: apd_material_fct
+      schema:
+        $ref: '#/components/parameters/search_apd_material/schema'
+      description: 
+        $ref: '#/components/parameters/search_apd_material/description'
+    search_apd_provenance_fct:
+      in: query
+      name: apd_provenance_fct
+      schema:
+        $ref: '#/components/parameters/search_apd_provenance/schema'
+      description: |
+        $ref: '#/components/parameters/search_apd_provenance/description'
+    search_apd_reference_number_fct:
+      in: query
+      name: apd_reference_number_fct
+      schema:
+        $ref: '#/components/parameters/search_apd_reference_number/schema'
+      description: |
+        $ref: '#/components/parameters/search_apd_reference_number/description'
+    search_apd_subject_fct:
+      in: query
+      name: apd_subject_fct
+      schema:
+        $ref: '#/components/parameters/search_apd_subject/schema'
+      description: |
+        $ref: '#/components/parameters/search_apd_subject/description'
+    search_digitalisattype_fct:
+      in: query
+      name: digitalisattype_fct
+      schema:
+        type: string
+      description: |
+        If *digitalisattype_fct* is selected in `facet` then this query parameter should have a query value.
+    search_keywords_fct:
+      in: query
+      name: keywords_fct
+      schema:
+        type: string
+      description: |
+        If *keywords_fct* is selected in `facet` then this query parameter should have a query value.
+    search_language_fct:
+      in: query
+      name: language_fct
+      schema:
+        type: string
+      description: |
+        If *language_fct* is selected in `facet` then this query parameter should have a query value.
+    search_mimetype_fct:
+      in: query
+      name: mimetype_fct
+      schema:
+        type: string
+      description: |
+        If *mimetype_fct* is selected in `facet` then this query parameter should have a query value.
+    search_objecttype_fct:
+      in: query
+      name: objecttype_fct
+      schema:
+        type: string
+      description: |
+        If *objecttype_fct* is selected in `facet` then this query parameter should have a query value.
+    search_place_fct:
+      in: query
+      name: place_fct
+      schema:
+        type: string
+      description: |
+        If *objecttype_fct* is selected in `facet` then this query parameter should have a query value.
+    search_provider_fct:
+      in: query
+      name: provider_fct
+      schema:
+        type: string
+      description: |
+        If *provider_fct* is selected in `facet` then this query parameter should have a query value.
+    search_sector_fct:
+      in: query
+      name: sector_fct
+      schema:
+        type: string
+      description: |
+        If *sector_fct* is selected in `facet` then this query parameter should have a query value.
+    search_state_fct:
+      in: query
+      name: state_fct
+      schema:
+        type: string
+      description: |
+        If *state_fct* is selected in `facet` then this query parameter should have a query value.
+    search_time_begin_fct:
+      in: query
+      name: time_begin_fct
+      schema:
+        type: string
+      description: |
+        If *time_begin_fct* is selected in `facet` then this query parameter should have a query value.
+    search_time_end_fct:
+      in: query
+      name: time_end_fct
+      schema:
+        type: string
+      description: |
+        If *time_end_fct* is selected in `facet` then this query parameter should have a query value.
+    search_time_fct:
+      in: query
+      name: time_fct
+      schema:
+        type: string
+      description: |
+        If *time_fct* is selected in `facet` then this query parameter should have a query value.
+    search_topic_fct:
+      in: query
+      name: topic_fct
+      schema:
+        type: string
+      description: |
+        If *topic_fct* is selected in `facet` then this query parameter should have a query value.
+    search_type_fct:
+      in: query
+      name: type_fct
+      schema:
+        type: string
+        enum:
+          - '001'
+          - '002'
+          - '003'
+          - '004'
+          - '005'
+          - '006'
+          - '007'
+          - '008'
+      description: |
+        If *type* is selected in `facet` then this query parameter should have a query value.
+          
+        | Element         | Term          | URI                                   |
+        |-----------------|---------------|---------------------------------------|
+        | *mediatype_001* | Audio         | http://ddb.vocnet.org/medientyp/mt001 |
+        | *mediatype_002* | Image         | http://ddb.vocnet.org/medientyp/mt002 |
+        | *mediatype_003* | Text          | http://ddb.vocnet.org/medientyp/mt003 |
+        | *mediatype_004* | Full-Text     | http://ddb.vocnet.org/medientyp/mt004 |
+        | *mediatype_005* | Video         | http://ddb.vocnet.org/medientyp/mt005 |
+        | *mediatype_006* | Others        | http://ddb.vocnet.org/medientyp/mt006 |
+        | *mediatype_007* | No media type | http://ddb.vocnet.org/medientyp/mt007 |
+        | *mediatype_008* | Institution   | http://ddb.vocnet.org/medientyp/mt008 |
+
+    search_affiliate:
+      in: query
+      name: affiliate
+      schema:
+        $ref: '#/components/parameters/search_affiliate_fct/schema'
+      description: |
+        $ref: '#/components/parameters/search_affiliate_fct/description'
+    search_affiliate_fct_involved:
+      in: query
+      name: affiliate_fct_involved
+      schema:
+        type: string
+      description: |
+        If *affiliate_fct_involved* is selected in `facet` then this query parameter should have a query value.
+    search_affiliate_fct_subject:
+      in: query
+      name: affiliate_fct_subject
+      schema:
+        type: string
+      description: |
+        If *affiliate_fct_subject* is selected in `facet` then this query parameter should have a query value.
+    search_aggregation_field:
+      in: query
+      name: aggregation_field
+      schema:
+        type: string
+      description: |
+        If *aggregation_field* is selected in `facet` then this query
+          parameter should have a query value.
+    search_aggregator_id:
+      in: query
+      name: aggregator_id
+      schema:
+        type: string
+      description: |
+        If *aggregator_id* is selected in `facet` then this query parameter should have a query value.
+    search_apd_abstracts:
+      in: query
+      name: apd_abstracts
+      schema:
+        type: string
+      description: |
+        If *apd_abstracts* is selected in `facet` then this query parameter should have a query value.
+    search_apd_context:
+      in: query
+      name: apd_context
+      schema:
+        type: string
+      description: |
+        If *apd_context* is selected in `facet` then this query parameter should have a query value.
+    search_apd_document_type:
+      in: query
+      name: apd_document_type
+      schema:
+        type: string
+      description: |
+        If *apd_document_type* is selected in `facet` then this query
+          parameter should have a query value.
+    search_apd_keywords:
+      in: query
+      name: apd_keywords
+      schema:
+        type: string
+      description: |
+        If *apd_keywords* is selected in `facet` then this query parameter should have a query value.
+    search_apd_level_of_description: 
+      in: query
+      name: apd_level_of_description
+      schema:
+        type: string
+      description: |
+        If *apd_level_of_description* is selected in `facet` then this query parameter should have a query value.
+    search_apd_material:
+      in: query
+      name: apd_material
+      schema:
+        type: string
+      description: |
+        If *apd_material* is selected in `facet` then this query parameter should have a query value.
+    search_apd_provenance:
+      in: query
+      name: apd_provenance
+      schema:
+        type: string
+      description: |
+        If *apd_provenance* is selected in `facet` then this query parameter should have a query value.
+    search_apd_reference_number:
+      in: query
+      name: apd_reference_number
+      schema:
+        type: string
+      description: |
+        If *apd_reference_number* is selected in `facet` then this query parameter should have a query value.
+    search_apd_subject:
+      in: query
+      name: apd_subject
+      schema:
+        type: string
+      description: |
+        If *apd_subject* is selected in `facet` then this query parameter should have a query value.
+    search_apd_xml_sort:
+      in: query
+      name: apd_xml_sort
+      schema:
+        type: string
+      description: |
+        If *apd_xml_sort* is selected in `facet` then this query parameter should have a query value.
+    search_atoz:
+      in: query
+      name: atoz
+      schema:
+        type: string
+      description: |
+        If *atoz* is selected in `facet` then this query parameter should have
+          a query value.
+    search_begin_time:
+      in: query
+      name: begin_time
+      schema:
+        type: string
+      description: |
+        If *begin_time* is selected in `facet` then this query parameter should have a query value.
+    search_category:
+      in: query
+      name: category
+      schema:
+        type: string
+      description: |
+        If *category* is selected in `facet` then this query parameter should have a query value.
+    search_content:
+      in: query
+      name: content
+      schema:
+        type: string
+      description: |
+        If *content* is selected in `facet` then this query parameter should have a query value.
+    search_context:
+      in: query
+      name: context
+      schema:
+        type: string
+      description: |
+        If *context* is selected in `facet` then this query parameter should have a query value.
+    search_dataset_id:
+      in: query
+      name: dataset_id
+      schema:
+        type: string
+      description: |
+        If *dataset_id* is selected in `facet` then this query parameter should have a query value.
+    search_dataset_label:
+      in: query
+      name: dataset_label
+      schema:
+        type: string
+      description: |
+        If *dataset_label* is selected in `facet` then this query parameter should have a query value.
+    search_description: 
+      in: query
+      name: description
+      schema:
+        type: string
+      description: |
+        If *description* is selected in `facet` then this query parameter should have a query value.
+    search_digitalCopyType:
+      in: query
+      name: digitalCopyType
+      schema:
+        type: string
+      description: |
+        If *digitalCopyType* is selected in `facet` then this query parameter should have a query value.
+    search_digitalisat:
+      in: query
+      name: digitalisat
+      schema:
+        type: string
+      description: |
+        If *digitalisat* is selected in `facet` then this query parameter should have a query value.
+    search_end_time:
+      in: query
+      name: end_time
+      schema:
+        type: string
+      description: |
+        If *end_time* is selected in `facet` then this query parameter should have a query value.
+    search_fulltext:
+      in: query
+      name: fulltext
+      schema:
+        type: string
+      description: |
+        If *fulltext* is selected in `facet` then this query parameter should have a query value.
+    search_fulltext_search:
+      in: query
+      name: fulltext_search
+      schema:
+        type: string
+      description: |
+        If *fulltext_search* is selected in `facet` then this query parameter should have a query value.
+    search_geocode:
+      in: query
+      name: geocode
+      schema:
+        type: string
+      description: |
+        If *geocode* is selected in `facet` then this query parameter should have a query value.
+    search_geocode_0_coordinate:
+      in: query
+      name: geocode_0_coordinate
+      schema:
+        type: string
+      description: |
+        If *geocode_0_coordinate* is selected in `facet` then this query parameter should have a query value.
+    search_geocode_1_coordinate:
+      in: query
+      name: geocode_1_coordinate
+      schema:
+        type: string
+      description: |
+        If *geocode_1_coordinate* is selected in `facet` then this query parameter should have a query value.
+    search_grid_preview:
+      in: query
+      name: grid_preview
+      schema:
+        type: string
+      description: |
+          If *grid_preview* is selected in `facet` then this query parameter should have a query value.
+    search_hasItems:
+      in: query
+      name: hasItems
+      schema:
+        type: string
+      description: |
+          If *hasItems* is selected in `facet` then this query parameter should have a query value.
+    search_id:
+      in: query
+      name: id
+      schema:
+        type: string
+      description: |
+          If *id* is selected in `facet` then this query parameter should have a query value.
+    search_ingest_id:
+      in: query
+      name: ingest_id
+      schema:
+        type: string
+      description: |
+          If *ingest_id* is selected in `facet` then this query parameter should have a query value.
+    search_institution_name:
+      in: query
+      name: institution_name
+      schema:
+        type: string
+      description: |
+        If *institution_name* is selected in `facet` then this query parameter should have a query value.
+    search_keywords:
+      in: query
+      name: keywords
+      schema:
+        $ref: '#/components/parameters/search_keywords_fct/schema'
+      description: |
+        $ref: '#/components/parameters/search_keywords_fct/description'
+    search_label:
+      in: query
+      name: label
+      schema:
+        type: string
+      description: |
+         If *label* is selected in `facet` then this query parameter should have a query value.
+    search_language:
+      in: query
+      name: language
+      schema:
+        $ref: '#/components/parameters/search_language_fct/schema'
+      description: |
+        $ref: '#/components/parameters/search_language_fct/description'
+    search_last_update:
+      in: query
+      name: last_update
+      schema:
+        type: string
+      description: |
+        If *last_update* is selected in `facet` then this query parameter should have a query value.
+    search_license:
+      in: query
+      name: license
+      schema:
+        type: string
+      description: |
+        If *license* is selected in `facet` then this query parameter should have a query value.
+    search_license_group:
+      in: query
+      name: license_group
+      schema:
+        type: string
+      description: |
+        If *license_group* is selected in `facet` then this query parameter should have a query value.
+    search_mapping_version:
+      in: query
+      name: mapping_version
+      schema:
+        type: string
+      description: |
+        If *mapping_version* is selected in `facet` then this query parameter should have a query value.
+    search_md_format:
+      in: query
+      name: md_format
+      schema:
+        type: string
+      description: |
+         If *md_format* is selected in `facet` then this query parameter should have a query value.
+    search_objecttype:
+      in: query
+      name: objecttype
+      schema:
+        $ref: '#/components/parameters/search_objecttype_fct/schema'
+      description: |
+        $ref: '#/components/parameters/search_objecttype_fct/description'
+    search_place:
+      in: query
+      name: place
+      schema:
+        $ref: '#/components/parameters/search_place_fct/schema'
+      description: |
+        $ref: '#/components/parameters/search_place_fct/description'
+    search_preview:
+      in: query
+      name: preview
+      schema:
+        type: string
+      description: |
+        If *preview* is selected in `facet` then this query parameter should have a query value.
+    search_preview_store:
+      in: query
+      name: preview_store
+      schema:
+        type: string
+      description: |
+        If *preview_store* is selected in `facet` then this query parameter should have a query value.
+    search_provider:
+      in: query
+      name: provider
+      schema:
+        $ref: '#/components/parameters/search_provider_fct/schema'
+      description: |
+        $ref: '#/components/parameters/search_provider_fct/description'
+    search_provider_id:
+      in: query
+      name: provider_id
+      schema:
+        type: string
+      description: |
+        If *provider_id* is selected in `facet` then this query parameter should have a query value.
+    search_ranking:
+      in: query
+      name: ranking
+      schema:
+        type: string
+      description: |
+        If *ranking* is selected in `facet` then this query parameter should have a query value.
+    search_revision_id:
+      in: query
+      name: revision_id
+      schema:
+        type: string
+      description: |
+        If *revision_id* is selected in `facet` then this query parameter should have a query value.
+    search_sector:
+      in: query
+      name: sector
+      schema:
+        $ref: '#/components/parameters/search_sector_fct/schema'
+      description: |
+        $ref: '#/components/parameters/search_sector_fct/description'
+    search_signature:
+      in: query
+      name: signature
+      schema:
+        type: string
+      description: |
+        If *signature* is selected in `facet` then this query parameter should have a query value.
+    search_sort_field:
+      in: query
+      name: sort_field
+      schema:
+        type: string
+      description: |
+        If *sort_field* is selected in `facet` then this query parameter should have a query value.
+    search_source_format:
+      in: query
+      name: source_format
+      schema:
+        type: string
+      description: |
+        If *source_format* is selected in `facet` then this query parameter should have a query value.
+    search_spell_check:
+      in: query
+      name: spell_check
+      schema:
+        type: string
+      description: |
+        If *spell_check* is selected in `facet` then this query parameter should have a query value.
+    search_state:
+      in: query
+      name: state
+      schema:
+        $ref: '#/components/parameters/search_state_fct/schema'
+      description: |
+        $ref: '#/components/parameters/search_state_fct/description'
+    search_subsector:
+      in: query
+      name: subsector
+      schema:
+        type: string
+      description: |
+        If *subsector* is selected in `facet` then this query parameter should have a query value.
+    search_suggest_field:
+      in: query
+      name: suggest_field
+      schema:
+        type: string
+      description: |
+        If *suggest_field* is selected in `facet` then this query parameter should have a query value.
+    search_suggest_field_apd:
+      in: query
+      name: suggest_field_apd
+      schema:
+        type: string
+      description: |
+          If *suggest_field_apd* is selected in `facet` then this query parameter should have a query value.
+    search_supplier_id:
+      in: query
+      name: supplier_id
+      schema:
+        type: string
+      description: |
+        If *supplier_id* is selected in `facet` then this query parameter should have a query value.
+    search_time:
+      in: query
+      name: time
+      schema:
+        $ref: '#/components/parameters/search_time_fct/schema'
+      description: |
+        $ref: '#/components/parameters/search_time_fct/description'
+    search_title:
+      in: query
+      name: title
+      schema:
+        type: string
+      description: |
+        If *title* is selected in `facet` then this query parameter should have a query value.
+    search_topic:
+      in: query
+      name: topic
+      schema:
+        $ref: '#/components/parameters/search_topic_fct/schema'
+      description: |
+        $ref: '#/components/parameters/search_topic_fct/description'
+    search_tp_category_id:
+      in: query
+      name: tp_category_id
+      schema:
+        type: string
+      description: |
+        If *tp_category_id* is selected in `facet` then this query parameter should have a query value.
+    search_type:
+      in: query
+      name: type
+      schema:
+        $ref: '#/components/parameters/search_type_fct/schema'
+      description: 
+        $ref: '#/components/parameters/search_type_fct/description'
+    search_view:
+      in: query
+      name: view
+      schema:
+        type: string
+      description: |
+        If *view* is selected in `facet` then this query parameter should have a query value.
+    search_facet.limit:
+      in: query
+      name: facet.limit
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+      description: |
+        Limits the number of values of a facet to the given amount.
+    search_minDocs:
+      in: query
+      name: minDocs
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+      description: |
+        The amount of documents a facet must exceed to be included in the result
+        set.
+    search_offset:
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+      description: |
+        This is the number of the first entry of the result.
+    search_rows:
+      in: query
+      name: rows
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 1000
+        default: 1000
+      description: |
+        This is the count of result entries to be shown in total.
+    search_sort:
+      in: query
+      name: sort
+      required: false
+      schema:
+        type: string
+      description: |
+        Defines the sorting order, which can be one of the following values. It requires the query parameter, otherwise the sort is always `random_<a_random_seed>`.
+        * `ALPHA_ASC`- Ascending alphanumeric sort order
+        * `ALPHA_DESC` - descending alphanumeric sort order
+        * `RELEVANCE` - Sorted by relevance
+        * `RANDOM_<my_seed>` - Random sort order (identical seeds will get the same order at any time)
+    search_cursorMark:
+      in: query
+      name: cursorMark
+      required: false
+      schema:
+        type: string
+      description: |
+        [Solr deep paging](https://lucene.apache.org/solr/guide/8_5/pagination-of-results.html). Pass `*` to start the first request.
+    search_person_facet:
+      in: query
+      name: facet
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          nullable: true
+          enum:
+            - id
+            - preferredName
+            - count
+            - count_sec_01
+            - count_sec_02
+            - count_sec_03
+            - count_sec_04
+            - count_sec_05
+            - count_sec_06
+            - count_sec_07
+            - type
+            - dateOfBirth_de
+            - dateOfDeath_de
+            - dateOfBirth_en
+            - dateOfDeath_en
+            - variantName
+            - variant_id
+            - professionOrOccupation
+            - placeOfBirth
+            - placeOfDeath
+            - thumbnail
+            - person_occupation_fct
+            - person_place_fct
+            - person_name_fct
+            - person_gender_fct
+            - suggest_field
+            - wildcard_fulltext
+            - last_update
+            - spell_check
+            - sort_field
+      description: |
+        This is the name of a facet which will be taken into account. Only facets which are supplied via a query parameter will be included into the result.
+        * *id:* 
+        * *preferredName:* 
+        * *count:* 
+        * *count_sec_01:* 
+        * *count_sec_02:* 
+        * *count_sec_03:* 
+        * *count_sec_04:* 
+        * *count_sec_05:* 
+        * *count_sec_06:* 
+        * *count_sec_07:* 
+        * *type:* 
+        * *dateOfBirth_de:* 
+        * *dateOfDeath_de:* 
+        * *dateOfBirth_en:* 
+        * *dateOfDeath_en:* 
+        * *variantName:* 
+        * *variant_id:* 
+        * *professionOrOccupation:* 
+        * *placeOfBirth:* 
+        * *placeOfDeath:* 
+        * *thumbnail:* 
+        * *person_occupation_fct:* 
+        * *person_place_fct:* 
+        * *person_name_fct:* 
+        * *person_gender_fct:* 
+        * *suggest_field:* 
+        * *wildcard_fulltext:* 
+        * *last_update:* 
+        * *spell_check:* 
+        * *sort_field:* 
+    search_person_id:
+      in: query
+      name: id
+      schema:
+        type: string
+      description: |
+        If *id* is selected in `facet` then this query parameter should have a query value.
+    search_person_preferredName:
+      in: query
+      name: preferredName
+      schema:
+        type: string
+      description: |
+        If *preferredName* is selected in `facet` then this query parameter should have a query value.
+    search_person_count:
+      in: query
+      name: count
+      schema:
+        type: string
+      description: |
+        If *count* is selected in `facet` then this query parameter should have a query value.
+    search_person_count_sec_01:
+      in: query
+      name: count_sec_01
+      schema:
+        type: string
+      description: |
+        If *count_sec_01* is selected in `facet` then this query parameter should have a query value.
+    search_person_count_sec_02:
+      in: query
+      name: count_sec_02
+      schema:
+        type: string
+      description: |
+        If *count_sec_02* is selected in `facet` then this query parameter should have a query value.
+    search_person_count_sec_03:
+      in: query
+      name: count_sec_03
+      schema:
+        type: string
+      description: |
+        If *count_sec_03* is selected in `facet` then this query parameter should have a query value.
+    search_person_count_sec_04:
+      in: query
+      name: count_sec_04
+      schema:
+        type: string
+      description: |
+        If *count_sec_04* is selected in `facet` then this query parameter should have a query value.
+    search_person_count_sec_05:
+      in: query
+      name: count_sec_05
+      schema:
+        type: string
+      description: |
+        If *count_sec_05* is selected in `facet` then this query parameter should have a query value.
+    search_person_count_sec_06:
+      in: query
+      name: count_sec_06
+      schema:
+        type: string
+      description: |
+        If *count_sec_06* is selected in `facet` then this query parameter should have a query value.
+    search_person_count_sec_07:
+      in: query
+      name: count_sec_07
+      schema:
+        type: string
+      description: |
+        If *count_sec_07* is selected in `facet` then this query parameter should have a query value.
+    search_person_type:
+      in: query
+      name: type
+      schema:
+        type: string
+      description: |
+        If *type* is selected in `facet` then this query parameter should have a query value.
+    search_person_dateOfBirth_de:
+      in: query
+      name: dateOfBirth_de
+      schema:
+        type: string
+      description: |
+        If *dateOfBirth_de* is selected in `facet` then this query parameter should have a query value.
+    search_person_dateOfDeath_de:
+      in: query
+      name: dateOfDeath_de
+      schema:
+        type: string
+      description: |
+        If *dateOfDeath_de* is selected in `facet` then this query parameter should have a query value.
+    search_person_dateOfBirth_en:
+      in: query
+      name: dateOfBirth_en
+      schema:
+        type: string
+      description: |
+        If *dateOfBirth_en* is selected in `facet` then this query parameter should have a query value.
+    search_person_dateOfDeath_en:
+      in: query
+      name: dateOfDeath_en
+      schema:
+        type: string
+      description: |
+        If *dateOfDeath_en* is selected in `facet` then this query parameter should have a query value.
+    search_person_variantName:
+      in: query
+      name: variantName
+      schema:
+        type: string
+      description: |
+        If *variantName* is selected in `facet` then this query parameter should have a query value.
+    search_person_variant_id:
+      in: query
+      name: variant_id
+      schema:
+        type: string
+      description: |
+        If *variant_id* is selected in `facet` then this query parameter should have a query value.
+    search_person_professionOrOccupation:
+      in: query
+      name: professionOrOccupation
+      schema:
+        type: string
+      description: |
+        If *professionOrOccupation* is selected in `facet` then this query parameter should have a query value.
+    search_person_placeOfBirth:
+      in: query
+      name: placeOfBirth
+      schema:
+        type: string
+      description: |
+        If *placeOfBirth* is selected in `facet` then this query parameter should have a query value.
+    search_person_placeOfDeath:
+      in: query
+      name: placeOfDeath
+      schema:
+        type: string
+      description: |
+        If *placeOfDeath* is selected in `facet` then this query parameter should have a query value.
+    search_person_thumbnail:
+      in: query
+      name: thumbnail
+      schema:
+        type: string
+      description: |
+        If *thumbnail* is selected in `facet` then this query parameter should have a query value.
+    search_person_person_occupation_fct:
+      in: query
+      name: person_occupation_fct
+      schema:
+        type: string
+      description: |
+        If *person_occupation_fct* is selected in `facet` then this query parameter should have a query value.
+    search_person_person_place_fct:
+      in: query
+      name: person_place_fct
+      schema:
+        type: string
+      description: |
+        If *person_place_fct* is selected in `facet` then this query parameter should have a query value.
+    search_person_person_name_fct:
+      in: query
+      name: person_name_fct
+      schema:
+        type: string
+      description: |
+        If *person_name_fct* is selected in `facet` then this query parameter should have a query value.
+    search_person_person_gender_fct:
+      in: query
+      name: person_gender_fct
+      schema:
+        type: string
+      description: |
+        If *person_gender_fct* is selected in `facet` then this query parameter should have a query value.
+    search_person_suggest_field:
+      in: query
+      name: suggest_field
+      schema:
+        type: string
+      description: |
+        If *suggest_field* is selected in `facet` then this query parameter should have a query value.
+    search_person_wildcard_fulltext:
+      in: query
+      name: wildcard_fulltext
+      schema:
+        type: string
+      description: |
+        If *wildcard_fulltext* is selected in `facet` then this query parameter should have a query value.
+    search_person_last_update:
+      in: query
+      name: last_update
+      schema:
+        type: string
+      description: |
+        If *last_update* is selected in `facet` then this query parameter should have a query value.
+    search_person_spell_check:
+      in: query
+      name: spell_check
+      schema:
+        type: string
+      description: |
+        If *spell_check* is selected in `facet` then this query parameter should have a query value.
+    search_person_sort_field:
+      in: query
+      name: sort_field
+      schema:
+        type: string
+      description: |
+        If *sort_field* is selected in `facet` then this query parameter should have a query value.
+    search_organization_facet:
+      in: query
+      name: facet
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          nullable: true
+          enum:
+            - id
+            - variant_id
+            - ddb_organization_id
+            - thumbnail
+            - type
+            - count
+            - count_sec_01
+            - count_sec_02
+            - count_sec_03
+            - count_sec_04
+            - count_sec_05
+            - count_sec_06
+            - count_sec_07
+            - label
+            - description
+            - subsector_fct
+            - sector_fct
+            - topic_fct
+            - state_fct
+            - city_fct
+            - city_de_fct
+            - city_en_fct
+            - state_de_fct
+            - state_en_fct
+            - sublabel_fct
+            - preferredName
+            - variantName
+            - topic
+            - state
+            - city
+            - city_de
+            - city_en
+            - state_de
+            - state_en
+            - sublabel
+            - revision_id
+            - dataset_id
+            - atoz
+            - subsector
+            - hasItems
+            - geocode
+            - geocode_0_coordinate
+            - geocode_1_coordinate
+            - location_display_name
+            - parent_id
+            - parent_organization_id
+            - suggest_field
+            - wildcard_fulltext
+            - last_update
+            - spell_check
+            - sort_field
+      description: |
+        This is the name of a facet which will be taken into account. Only facets which are supplied via a query parameter will be included into the result.
+        
+        * *id:* 
+        * *variant_id:* 
+        * *ddb_organization_id:* 
+        * *thumbnail:* 
+        * *type:* 
+        * *count:* 
+        * *count_sec_01:* 
+        * *count_sec_02:* 
+        * *count_sec_03:* 
+        * *count_sec_04:* 
+        * *count_sec_05:* 
+        * *count_sec_06:* 
+        * *count_sec_07:* 
+        * *label:* 
+        * *description: * 
+        * *subsector_fct:* 
+        * *sector_fct:* 
+        * *topic_fct:* 
+        * *state_fct:* 
+        * *city_fct:* 
+        * *city_de_fct:* 
+        * *city_en_fct:* 
+        * *state_de_fct:* 
+        * *state_en_fct:* 
+        * *sublabel_fct:* 
+        * *preferredName:* 
+        * *variantName:* 
+        * *topic:* 
+        * *state:* 
+        * *city:* 
+        * *city_de:* 
+        * *city_en:* 
+        * *state_de:* 
+        * *state_en:* 
+        * *sublabel:* 
+        * *revision_id:* 
+        * *dataset_id:* 
+        * *atoz:* 
+        * *subsector:* 
+        * *hasItems:* 
+        * *geocode:* 
+        * *geocode_0_coordinate:* 
+        * *geocode_1_coordinate:* 
+        * *location_display_name:* 
+        * *parent_id:* 
+        * *parent_organization_id:* 
+        * *suggest_field:* 
+        * *wildcard_fulltext:* 
+        * *last_update:* 
+        * *spell_check:* 
+        * *sort_field:* 
+    search_organization_id:
+      in: query
+      name: id
+      schema:
+        type: string
+      description: |
+        If *id* is selected in `facet` then this query parameter should have a query value.
+    search_organization_variant_id:
+      in: query
+      name: variant_id
+      schema:
+        type: string
+      description: |
+        If *variant_id* is selected in `facet` then this query parameter should have a query value.
+    search_organization_ddb_organization_id:
+      in: query
+      name: ddb_organization_id
+      schema:
+        type: string
+      description: |
+        If *ddb_organization_id* is selected in `facet` then this query parameter should have a query value.
+    search_organization_thumbnail:
+      in: query
+      name: thumbnail
+      schema:
+        type: string
+      description: |
+        If *thumbnail* is selected in `facet` then this query parameter should have a query value.
+    search_organization_type:
+      in: query
+      name: type
+      schema:
+        type: string
+      description: |
+        If *type* is selected in `facet` then this query parameter should have a query value.
+    search_organization_count:
+      in: query
+      name: count
+      schema:
+        type: string
+      description: |
+        If *count* is selected in `facet` then this query parameter should have a query value.
+    search_organization_count_sec_01:
+      in: query
+      name: count_sec_01
+      schema:
+        type: string
+      description: |
+        If *count_sec_01* is selected in `facet` then this query parameter should have a query value.
+    search_organization_count_sec_02:
+      in: query
+      name: count_sec_02
+      schema:
+        type: string
+      description: |
+        If *count_sec_02* is selected in `facet` then this query parameter should have a query value.
+    search_organization_count_sec_03:
+      in: query
+      name: count_sec_03
+      schema:
+        type: string
+      description: |
+        If *count_sec_03* is selected in `facet` then this query parameter should have a query value.
+    search_organization_count_sec_04:
+      in: query
+      name: count_sec_04
+      schema:
+        type: string
+      description: |
+        If *count_sec_04* is selected in `facet` then this query parameter should have a query value.
+    search_organization_count_sec_05:
+      in: query
+      name: count_sec_05
+      schema:
+        type: string
+      description: |
+        If *count_sec_05* is selected in `facet` then this query parameter should have a query value.
+    search_organization_count_sec_06:
+      in: query
+      name: count_sec_06
+      schema:
+        type: string
+      description: |
+        If *count_sec_06* is selected in `facet` then this query parameter should have a query value.
+    search_organization_count_sec_07:
+      in: query
+      name: count_sec_07
+      schema:
+        type: string
+      description: |
+        If *count_sec_07* is selected in `facet` then this query parameter should have a query value.
+    search_organization_label:
+      in: query
+      name: label
+      schema:
+        type: string
+      description: |
+        If *label* is selected in `facet` then this query parameter should have a query value.
+    search_organization_description: 
+      in: query
+      name: description
+      schema:
+        type: string
+      description: |
+        If *description* is selected in `facet` then this query parameter should have a query value.
+    search_organization_subsector_fct:
+      in: query
+      name: subsector_fct
+      schema:
+        type: string
+      description: |
+        If *subsector_fct* is selected in `facet` then this query parameter should have a query value.
+    search_organization_sector_fct:
+      in: query
+      name: sector_fct
+      schema:
+        type: string
+      description: |
+        If *sector_fct* is selected in `facet` then this query parameter should have a query value.
+    search_organization_topic_fct:
+      in: query
+      name: topic_fct
+      schema:
+        type: string
+      description: |
+        If *topic_fct* is selected in `facet` then this query parameter should have a query value.
+    search_organization_state_fct:
+      in: query
+      name: state_fct
+      schema:
+        type: string
+      description: |
+        If *state_fct* is selected in `facet` then this query parameter should have a query value.
+    search_organization_city_fct:
+      in: query
+      name: city_fct
+      schema:
+        type: string
+      description: |
+        If *city_fct* is selected in `facet` then this query parameter should have a query value.
+    search_organization_city_de_fct:
+      in: query
+      name: city_de_fct
+      schema:
+        type: string
+      description: |
+        If *city_de_fct* is selected in `facet` then this query parameter should have a query value.
+    search_organization_city_en_fct:
+      in: query
+      name: city_en_fct
+      schema:
+        type: string
+      description: |
+        If *city_en_fct* is selected in `facet` then this query parameter should have a query value.
+    search_organization_state_de_fct:
+      in: query
+      name: state_de_fct
+      schema:
+        type: string
+      description: |
+        If *state_de_fct* is selected in `facet` then this query parameter should have a query value.
+    search_organization_state_en_fct:
+      in: query
+      name: state_en_fct
+      schema:
+        type: string
+      description: |
+        If *state_en_fct* is selected in `facet` then this query parameter should have a query value.
+    search_organization_sublabel_fct:
+      in: query
+      name: sublabel_fct
+      schema:
+        type: string
+      description: |
+        If *sublabel_fct* is selected in `facet` then this query parameter should have a query value.
+    search_organization_preferredName:
+      in: query
+      name: preferredName
+      schema:
+        type: string
+      description: |
+        If *preferredName* is selected in `facet` then this query parameter should have a query value.
+    search_organization_variantName:
+      in: query
+      name: variantName
+      schema:
+        type: string
+      description: |
+        If *variantName* is selected in `facet` then this query parameter should have a query value.
+    search_organization_topic:
+      in: query
+      name: topic
+      schema:
+        type: string
+      description: |
+        If *topic* is selected in `facet` then this query parameter should have a query value.
+    search_organization_state:
+      in: query
+      name: state
+      schema:
+        type: string
+      description: |
+        If *state* is selected in `facet` then this query parameter should have a query value.
+    search_organization_city:
+      in: query
+      name: city
+      schema:
+        type: string
+      description: |
+        If *city* is selected in `facet` then this query parameter should have a query value.
+    search_organization_city_de:
+      in: query
+      name: city_de
+      schema:
+        type: string
+      description: |
+        If *city_de* is selected in `facet` then this query parameter should have a query value.
+    search_organization_city_en:
+      in: query
+      name: city_en
+      schema:
+        type: string
+      description: |
+        If *city_en* is selected in `facet` then this query parameter should have a query value.
+    search_organization_state_de:
+      in: query
+      name: state_de
+      schema:
+        type: string
+      description: |
+        If *state_de* is selected in `facet` then this query parameter should have a query value.
+    search_organization_state_en:
+      in: query
+      name: state_en
+      schema:
+        type: string
+      description: |
+        If *state_en* is selected in `facet` then this query parameter should have a query value.
+    search_organization_sublabel:
+      in: query
+      name: sublabel
+      schema:
+        type: string
+      description: |
+        If *sublabel* is selected in `facet` then this query parameter should have a query value.
+    search_organization_revision_id:
+      in: query
+      name: revision_id
+      schema:
+        type: string
+      description: |
+        If *revision_id* is selected in `facet` then this query parameter should have a query value.
+    search_organization_dataset_id:
+      in: query
+      name: dataset_id
+      schema:
+        type: string
+      description: |
+        If *dataset_id* is selected in `facet` then this query parameter should have a query value.
+    search_organization_atoz:
+      in: query
+      name: atoz
+      schema:
+        type: string
+      description: |
+        If *atoz* is selected in `facet` then this query parameter should have a query value.
+    search_organization_subsector:
+      in: query
+      name: subsector
+      schema:
+        type: string
+      description: |
+        If *subsector* is selected in `facet` then this query parameter should have a query value.
+    search_organization_hasItems:
+      in: query
+      name: hasItems
+      schema:
+        type: string
+      description: |
+        If *hasItems* is selected in `facet` then this query parameter should have a query value.
+    search_organization_geocode:
+      in: query
+      name: geocode
+      schema:
+        type: string
+      description: |
+        If *geocode* is selected in `facet` then this query parameter should have a query value.
+    search_organization_geocode_0_coordinate:
+      in: query
+      name: geocode_0_coordinate
+      schema:
+        type: string
+      description: |
+        If *geocode_0_coordinate* is selected in `facet` then this query parameter should have a query value.
+    search_organization_geocode_1_coordinate:
+      in: query
+      name: geocode_1_coordinate
+      schema:
+        type: string
+      description: |
+        If *geocode_1_coordinate* is selected in `facet` then this query parameter should have a query value.
+    search_organization_location_display_name:
+      in: query
+      name: location_display_name
+      schema:
+        type: string
+      description: |
+        If *location_display_name* is selected in `facet` then this query parameter should have a query value.
+    search_organization_parent_id:
+      in: query
+      name: parent_id
+      schema:
+        type: string
+      description: |
+        If *parent_id* is selected in `facet` then this query parameter should have a query value.
+    search_organization_parent_organization_id:
+      in: query
+      name: parent_organization_id
+      schema:
+        type: string
+      description: |
+        If *parent_organization_id* is selected in `facet` then this query parameter should have a query value.
+    search_organization_suggest_field:
+      in: query
+      name: suggest_field
+      schema:
+        type: string
+      description: |
+        If *suggest_field* is selected in `facet` then this query parameter should have a query value.
+    search_organization_wildcard_fulltext:
+      in: query
+      name: wildcard_fulltext
+      schema:
+        type: string
+      description: |
+        If *wildcard_fulltext* is selected in `facet` then this query parameter should have a query value.
+    search_organization_last_update:
+      in: query
+      name: last_update
+      schema:
+        type: string
+      description: |
+        If *last_update* is selected in `facet` then this query parameter should have a query value.
+    search_organization_spell_check:
+      in: query
+      name: spell_check
+      schema:
+        type: string
+      description: |
+        If *spell_check* is selected in `facet` then this query parameter should have a query value.
+    search_organization_sort_field:
+      in: query
+      name: sort_field
+      schema:
+        type: string
+      description: |
+        If *sort_field* is selected in `facet` then this query parameter should have a query value.
+    type:
+      in: query
+      name: type
+      required: false
+      schema:
+        type: string
+    uuid:
+      in: path
+      name: uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+        minLength: 36
+        maxLength: 36
+  responses:
+    '200':
+      description: Success
+      content:
+        'application/json':
+          schema:
+            type: object
+        'application/xml':
+          schema:
+            type: object
+        '*/*':
+          schema:
+            type: object
+    '200-jsononly':
+      description: Success
+      content:
+        'application/json':
+          schema:
+            type: object
+    '403':
+      content:
+        'application/json':
+          schema:
+            properties:
+              message:
+                example: Your security level does not allow access to this method.
+                type: string
+              name:
+                example: NotAuthorizedException
+                type: string
+              stacktrace:
+                example: ''
+                type: string
+            required:
+              - name
+              - message
+            type: object
+            xml:
+              name: error
+              namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
+        'application/xml':
+          schema:
+            properties:
+              message:
+                example: Your security level does not allow access to this method.
+                type: string
+              name:
+                example: NotAuthorizedException
+                type: string
+              stacktrace:
+                example: ''
+                type: string
+            required:
+              - name
+              - message
+            type: object
+            xml:
+              name: error
+              namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
+      description: |
+        Forbidden. Es wurde kein API-Key übermittelt oder der API-Key hat keine Berechtigung auf die Ressource zuzugreifen.
+    '404':
+      content:
+        'application/json':
+          schema:
+            properties:
+              message:
+                example: Item 'ABCDEFGHIJKLMNOPQRSTUVWXYZ01234' not found.
+                type: string
+              name:
+                example: ItemNotFoundException
+                type: string
+              stacktrace:
+                example: ''
+                type: string
+            required:
+              - name
+              - message
+            type: object
+            xml:
+              name: error
+              namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
+        'application/xml':
+          schema:
+            properties:
+              message:
+                example: Item 'ABCDEFGHIJKLMNOPQRSTUVWXYZ01234' not found.
+                type: string
+              name:
+                example: ItemNotFoundException
+                type: string
+              stacktrace:
+                example: ''
+                type: string
+            required:
+              - name
+              - message
+            type: object
+            xml:
+              name: error
+              namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
+      description: |
+        Not found. Die API-Methode oder das angeforderte DDB-Objekt existiert nicht bzw. konnte nicht gefunden werden.
+    '406':
+      content:
+        'application/json':
+          schema:
+            properties:
+              message:
+                example: The requested type is not acceptable.
+                type: string
+              name:
+                example: NotAcceptableException
+                type: string
+              stacktrace:
+                example: ''
+                type: string
+            required:
+              - name
+              - message
+            type: object
+            xml:
+              name: error
+              namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
+        'application/xml':
+          schema:
+            properties:
+              message:
+                example: The requested type is not acceptable.
+                type: string
+              name:
+                example: NotAcceptableException
+                type: string
+              stacktrace:
+                example: ''
+                type: string
+            required:
+              - name
+              - message
+            type: object
+            xml:
+              name: error
+              namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
+      description: |
+        Not Acceptable. Der Request kann nicht beantwortet werden. Ggf. enthält der Request Header Fehler oder es wurde ein Format (Accept-Feld) angefordert, das der Server nicht liefern kann.
+    '413':
+      description: |
+        The HTTP 413 Payload Too Large response status code indicates that the  request entity is larger than limits defined by server; the server might  close the connection or return a Retry-After header field.
+    '500':
+      content:
+        'application/json':
+          schema:
+            properties:
+              message:
+                example: |
+                  org.apache.solr.common.SolrException: undefined field
+                  provider_id
+                type: string
+              name:
+                example: GeneralException
+                type: string
+              stacktrace:
+                example: ''
+                type: string
+            required:
+              - name
+              - message
+            type: object
+            xml:
+              name: error
+              namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
+        'application/xml':
+          schema:
+            properties:
+              message:
+                example: |
+                  org.apache.solr.common.SolrException: undefined field
+                  provider_id
+                type: string
+              name:
+                example: GeneralException
+                type: string
+              stacktrace:
+                example: ''
+                type: string
+            required:
+              - name
+              - message
+            type: object
+            xml:
+              name: error
+              namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
+      description: |
+        Server Error. Es gab ein schwerwiegendes Serverproblem beim Bearbeiten der Anfrage. Weitere Details befinden sich in der Antwort des Servers.
+  securitySchemes:
+    Query_Parameter:
+      type: apiKey
+      in: query
+      name: oauth_consumer_key
+      description: |
+        Authorization via query parameter within the url.
+        
+        *Value must be*: `<your API key>`
+    Request_Header:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: |
+        Authorization via HTTP request header field (OAuth 1.0).
+        
+        *Value must be*: `OAuth oauth_consumer_key="<your API key>"`
+tags:
+  - name: binary
+    description: |
+      The method binary returns the content of a binary file of an item for a given item-ID. This method provides response data as application/octet-stream. A binary file at DDB can be a picture, a tumbnail of a picture, a video clip, an audio file etc.
+  - name: institutions
+    description: |
+      The method institutions returns a list of institutions which are registered at the DDB. It is a read-only service and must be accessed with a
+      HTTP-GET-request.
+  - name: items
+    description: |
+      Von der DDB erzeugter Datensatz, in der Regel mit Vorschaudateien, der ein physisches oder digitales Objekt beschreibt, das zum Erbe der deutschen Kultur und Wissenschaft gehört. Jedes DDB-Objekt hat im DDB-Portal eine DDB-Objektseite.
+  - name: version
+    description: |
+      Versionierung
+  - name: search
+    description: |
+      The method search is providing an interface to the search engine of the DDB.
