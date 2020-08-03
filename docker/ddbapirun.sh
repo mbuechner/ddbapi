@@ -22,5 +22,5 @@ sed -i 's/background: #fafafa;/background: #fff;/g' $INDEX_FILE
 gzip -k $INDEX_FILE
 
 # Run last Swagger script line
-eval $LASTLINE
+eval "$LAST_LINE"
 
