@@ -1835,42 +1835,42 @@ components:
       schema:
         $ref: '#/components/parameters/search_apd_abstracts/schema'
       description: 
-        $ref: '#/components/parameters/search_apd_abstracts/description'
+        See `search_apd_abstracts`.
     search_apd_context_fct:
       in: query
       name: apd_context_fct
       schema:
         $ref: '#/components/parameters/search_apd_context/schema'
       description: 
-        $ref: '#/components/parameters/search_apd_context/description'
+        See `search_apd_context`.
     search_apd_document_type_fct:
       in: query
       name: apd_document_type_fct
       schema:
         $ref: '#/components/parameters/search_apd_document_type/schema'
       description: 
-        $ref: '#/components/parameters/search_apd_document_type/description'
+        See `search_apd_document_type`.
     search_apd_keywords_fct:
       in: query
       name: apd_keywords_fct
       schema:
         $ref: '#/components/parameters/search_apd_keywords/schema'
       description: 
-        $ref: '#/components/parameters/search_apd_keywords/description'
+        See `search_apd_keywords`.
     search_apd_level_of_description_fct:
       in: query
       name: apd_level_of_description_fct
       schema:
         $ref: '#/components/parameters/search_apd_level_of_description/schema'
       description: 
-        $ref: '#/components/parameters/search_apd_level_of_description/description'
+        See `search_apd_level_of_description`.
     search_apd_material_fct:
       in: query
       name: apd_material_fct
       schema:
         $ref: '#/components/parameters/search_apd_material/schema'
       description: 
-        $ref: '#/components/parameters/search_apd_material/description'
+        See `search_apd_material`.
     search_apd_provenance_fct:
       in: query
       name: apd_provenance_fct
@@ -2482,7 +2482,7 @@ components:
       schema:
         $ref: '#/components/parameters/search_type_fct/schema'
       description: 
-        $ref: '#/components/parameters/search_type_fct/description'
+        See `search_type_fct`.
     search_view:
       in: query
       name: view
