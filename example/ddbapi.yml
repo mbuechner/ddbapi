@@ -3,7 +3,6 @@ info:
   title: API der Deutsche Digitalen Bibliothek
   version: 2.6.1
   description: |
-    ![DDB logo](https://www.deutsche-digitale-bibliothek.de/assets/logoHeaderSmall.png)
     ## Beschreibung
      
     Das Application Programming Interface (API) ist eine Programmierschnittstelle, die den Zugriff auf Daten und Methoden der Deutschen Digitalen Bibliothek (DDB) ermöglicht. Sie erlaubt die Entwicklung vielfältiger Anwendungen, die die in der DDB vorgehaltenen Inhalte nutzen und sie jeweils nach den eigenen Wünschen darstellen und in unterschiedliche Kontexte einbetten. Das API steht allen Personen offen.
