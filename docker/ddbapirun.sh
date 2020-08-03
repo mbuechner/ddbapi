@@ -19,6 +19,8 @@ echo "Add DDBapi plug-in..."
 sed -i 's/plugins: \[/plugins: \[ DDBLogoPlugin,/g' $INDEX_FILE
 echo "Change backgroud color to white..."
 sed -i 's/background: #fafafa;/background: #fff;/g' $INDEX_FILE
+echo "Change title..."
+sed -i 's/<title>Swagger UI<\/title>/<title>DDBapi | Documentation of the Application Programming Interface (API)<\/title>/g' $INDEX_FILE
 gzip -k $INDEX_FILE
 
 # Run last Swagger script line
