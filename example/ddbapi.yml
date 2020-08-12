@@ -1,28 +1,19 @@
 openapi: 3.0.3
 info:
   title: API der Deutsche Digitalen Bibliothek
-  version: 2.6.1
+  version: 2.6.3-MB
   description: |
-    ## Beschreibung
-     
-    Das Application Programming Interface (API) ist eine Programmierschnittstelle, die den Zugriff auf Daten und Methoden der Deutschen Digitalen Bibliothek (DDB) ermöglicht. Sie erlaubt die Entwicklung vielfältiger Anwendungen, die die in der DDB vorgehaltenen Inhalte nutzen und sie jeweils nach den eigenen Wünschen darstellen und in unterschiedliche Kontexte einbetten. Das API steht allen Personen offen.
+    ### Description
+    The API is an [application programming interface](https://en.wikipedia.org/wiki/Application_programming_interface) that allows users to access data via methods provided by the [Deutsche Digitale Bibliothek (DDB)](https://www.deutsche-digitale-bibliothek.de/). It allows the development of a range of applications that use material in the DDB, displaying it as they see fit and embedding it in a variety of contexts. The API is available to all users who have registered with the DDB portal, as soon as they have set up an access code (‘API key’) in their “My DDB” area of the portal.
+
+    Users must verify their identity using an API key in order to use the Deutsche Digitale Bibliothek API. The key is a unique series of characters that has to be transmitted each time the user sends an enquiry to the API. All registered users of the Deutsche Digitale Bibliothek can obtain their personal authentication key for using the API. Keys can be issued once users are logged into their [DDB account (“My DDB”)](https://www.deutsche-digitale-bibliothek.de/user/apikey) at our portal and used in this interactive API documentation (“Authorize”) as well.
     
+    ### Licenses
+    In general all metadata provided via the API is licensed [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en).  For binary data like images, video etc. DDB has introduced a licensing model that allows participating institutions to select from a bundle of licenses and license notices. If a reuse of this data is allowed must be checked in every case according to the information provided by the metadata.
     
-    Für die Nutzung des Application Programming Interfaces der Deutschen Digitalen Bibliothek ist eine Authentifikation in Form eines Schlüssels (API Key) notwendig. Ein Authentifikationsschlüssel ist eine dem Nutzer eindeutig zugeordnete Zeichenfolge, die bei jeder Anfrage an das API zum Zwecke der Authentifikation mit zu übertragen ist. Authentifikationsschlüssel sind vertraulich und ausschließlich für die Verwendung durch den Nutzer bestimmt.
-    Sie dürfen nicht an Dritte weitergegeben werden, es sei denn mit ausdrücklicher schriftlicher Zustimmung der DDB.
-    
-    ## Wo finde ich meinen DDB-API-Key?
-    
-    Jeder registrierte Benutzer der Deutschen Digitalen Bibliothek kann sich einen Authentifizierungsschlüssel für die Verwendung des APIs erzeugen lassen. Dies erfolgt über das eigene Nutzerkonto im Bereich [„Meine DDB“](https://www.deutsche-digitale-bibliothek.de/login).
-    
-    
-    Die Software ist frei unter der [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)-Lizenz im [GitHub der DDB](https://github.com/Deutsche-Digitale-Bibliothek/ddb-backend) veröffentlicht.
-    
-    
-    **Author:** Patrick Dinger, Michael Büchner
+    **Authors:** Patrick Dinger, Michael Büchner
   contact:
     name: Service Point of the German Digital Library
-    email: service@deutsche-digitale-bibliothek.de
     url: 'https://pro.deutsche-digitale-bibliothek.de/node/530'
   license:
     name: Apache 2.0
@@ -171,8 +162,9 @@ paths:
   '/institutions/map':
     get:
       operationId: getInstitutionMap
-      summary: TODO FIZ
-      description: TODO FIZ
+      summary: Gets a list of institutions for a given cluster ID
+      description: This method returns a list of institutions for a given cluster ID.
+      # TODO What's a cluster ID?
       parameters:
         - in: query
           name: clusterid
@@ -180,7 +172,7 @@ paths:
           schema:
             type: string
             default: -1
-          description: TODO FIZ
+          description: the cluster-id of the items to return
         - in: query
           name: offset
           required: false
@@ -188,7 +180,7 @@ paths:
             type: integer
             format: int32
             default: 0
-          description: TODO FIZ
+          description: entry number of the first item of the result list to return
         - in: query
           name: length
           required: false
@@ -196,7 +188,7 @@ paths:
             type: integer
             format: int32
             default: -1
-          description: TODO FIZ
+          description: max number of items to return
         - in: query
           name: hasItems
           required: false
@@ -223,15 +215,16 @@ paths:
   '/institutions/map/cluster':
     get:
       operationId: getInstitutionMapCluster
-      summary: ??? (TODO FIZ)
-      description: ??? (TODO FIZ)
+      summary: This methode is not implemented.
+      description: This methode is not implemented.
+      deprecated: true
       parameters:
         - in: query
           name: zoomlevel
           required: false
           schema:
             type: string
-          description: ??? (TODO FIZ)
+          description: Not implemented.
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -255,7 +248,8 @@ paths:
       description: |
         An AIP contains all available information of an item including a persistent identifier.
         
-        * TODO FIZ: Was ist der Unterschied zwischen hier und `/items/{id}/aip`?
+        *  FIZ:Kein Unterschied, außer dass dieser Endpounkt die Elemente unterhalb des EDM noch sortiert sortChildNodes(aip.getEdm().getAny().get(0)); Das aber auch nur wenn der Client JSON und nicht XML haben will. Wahrscheinlich sollten wir einfach eine der beiden Funktionen rausschmeißen. 
+
       parameters:
         - $ref: '#/components/parameters/id'
       responses:
@@ -274,44 +268,193 @@ paths:
         - Request_Header: []
       tags:
         - items
-  '/items/{id}/{component}':
+  '/items/{id}/aip':
     get:
-      operationId: getItemsIdComponent
+      operationId: getItemsIdAip
       summary: Returns a component of the Archive Information Package (AIP) of a DDB item
       description: |
-        An AIP contains all available information of an item including a persistent identifier.
-        
-        * TODO FIZ: Was ist der Unterschied zwischen hier und `/items/{id}/aip`?
+        An AIP contains all available information of an item including a persistent identifier. All AIPs constist of the following components: *binaries*, *children*, *edm*, *indexing-profile*, *parent*, *source* and *view*.
+      deprecated: true
       parameters:
         - $ref: '#/components/parameters/id'
-        - in: path
-          name: component
-          required: true
-          description: |
-            * TODO Michael
-            * TODO FIZ Die Methode source funktioniert nicht.
-            | Component            | Description                                                                                                                                                               |
-            |----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-            | *aip*                | An AIP contains all available information of an item including a persistent identifier.<br><br>**TODO** FIZ: Was ist der Unterschied zwischen hier und `/items/{id}`?     |
-            | *binaries*           |                                                                                                                                                                           |
-            | *children*           |                                                                                                                                                                           |
-            | *edm*                |                                                                                                                                                                           |
-            | *indexing-profile*   |                                                                                                                                                                           |
-            | *parent*             |                                                                                                                                                                           |
-            | *source*             |                                                                                                                                                                                                                                    |
-            | *view*               |                                                                                                                                                                           |
-        
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - items
+  '/items/{id}/binaries':
+    get:
+      operationId: getItemsIdBinaries
+      summary: Returns a list of binary data files related to an item
+      description: |
+        The *binary* component is a list of binary data files related to an item for a given item-ID.
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - items
+  '/items/{id}/children':
+    get:
+      operationId: getItemsIdChildren
+      summary: Returns metadata of a item, which are related to the inquired item and the child item
+      description: |
+        The *children* component consists of metadata of the inquired item and all items, which are one level deeper (child item) in the hierarchy than the inquired item. The child items will be sorted according to the position field of the hierarchy nodes. If the position is the same the label will be used for sorting. The provided metadata can be empty if the item does not have any child items.
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - items
+  '/items/{id}/edm':
+    get:
+      operationId: getItemsIdEdm
+      summary: Returns the Europeana Data Model (EDM)
+      description: |
+        The *edm* component is metadata in the Europeana Data Model. Different profiles are supported by this method.
+      parameters:
+        - $ref: '#/components/parameters/id'
+        - in: header
+          name: accept-profile
+          required: false
           schema:
             type: string
+            default: https://www.deutsche-digitale-bibliothek.de/ns/ddb-linkedData-profile
             enum:
-              - aip
-              - binaries
-              - children
-              - edm
-              - indexing-profile
-              - parent
-              - source
-              - view
+              - https://www.deutsche-digitale-bibliothek.de/ns/europeana-edm-profile
+              - https://www.deutsche-digitale-bibliothek.de/ns/ddb-linkedData-profile
+          description: EDM data can have different profiles. DDB API can deliver DDB Linked Data profile in any case and in some cases Europeana EDM profile. 
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - items
+  '/items/{id}/indexing-profile':
+    get:
+      operationId: getItemsIdIndexingProfile
+      summary: Returns the profile of an item, which was used for the indexing process
+      description: |
+        The *indexing-profile* component is the profile of an item, which was used for the indexing process.
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - items
+  '/items/{id}/parent':
+    get:
+      operationId: getItemsIdParent
+      summary: Returns metadata of a item, which are related to the inquired item and the parent, grandparent, etc. items
+      description: |
+        The *parents* component consists of metadata of the inquired item and of these items which are related to the inquired item and which are one or more levels higher (parent, grandparent ... item) in the hierarchy than the inquired item. This means that all parent items up to the root item will be provided. The provided metadata can be empty if the item does not have any parent items.
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - items
+  '/items/{id}/source':
+    get:
+      operationId: getItemsIdSource
+      summary: TODO
+      description: |
+        TODO
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '406':
+          $ref: '#/components/responses/406'
+        '500':
+          $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
+      tags:
+        - items
+  '/items/{id}/view':
+    get:
+      operationId: getItemsIdView
+      summary: Returns the view of an item
+      description: |
+        The component *view* is the view of an item. A view is the data set a frontend page at DDB is based on. 
+      parameters:
+        - $ref: '#/components/parameters/id'
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -500,8 +643,8 @@ paths:
   '/search/cluster':
     get:
       operationId: getSearchCluster
-      summary: TODO
-      description: ??? TODO FIZ Was tut das?
+      summary: Performs a search and clusters the results according to the aggregation field.
+      description: ??? Anmerkung Wird soweit ich das sehen konnte in der DDB nicht verwendet.
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -660,10 +803,8 @@ paths:
     get:
       operationId: getSearchFacetsFacetName
       summary: Returns all facet values for a given facet
-      description: |
-        TODO
-        
-        TODO FIZ: Wie genau funktioniert das? Stimmt das so?
+      description: | 
+        TODO arbeitet mit Solrs facet Funktion. Gibt alle Werte die in dem genannten Feld vorkommen zurück, inkl. Der Anzahl wie oft diese Werte vorkommen.
       parameters:
         - in: path
           name: facetName
@@ -891,7 +1032,7 @@ paths:
     get:
       operationId: getSearchFacetsMaxpage
       summary: TODO
-      description: TODO FIZ (Wofür ist das?)
+      description: TODO FIZ (Wofür ist das?) Das gibt den Wert wieder der in der Backend Konfiguration als max Anzahl Seiten Suchergebnisse hinterlegt ist. Ich sehe aber nicht, dass das im Backend berücksichtigt wird und finde auch keine Verwendung dieser API-Methode im Frontend. 
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -979,9 +1120,7 @@ paths:
       operationId: getSearchSuggest
       summary: Returns suggestions for a given query
       description: |
-        TODO
-        
-        TODO FIZ: Das scheint nicht zu gehen? Warum? Was macht das?
+        TODO Patrick/Michel Wird für’s Autocomplete verwendet, nutzt intern den Solr Terms-Request Handler.
       parameters:
         - $ref: '#/components/parameters/search_query'
       responses:
@@ -1237,9 +1376,7 @@ paths:
       operationId: getSearchPersonSuggest
       summary: TODO
       description: |
-        TODO
-        
-        TODO FIZ: Das scheint nicht zu gehen? Warum? Was macht das?
+        TODO Patrick/Michel Wird für’s Autocomplete verwendet, nutzt intern den Solr Terms-Request Handler.
       parameters:
         - $ref: '#/components/parameters/search_query'
       responses:
@@ -1580,9 +1717,7 @@ paths:
       operationId: getSearchOrganizationSuggest
       summary: TODO
       description: |
-        TODO
-        
-        TODO FIZ: Das scheint nicht zu gehen? Warum? Was macht das?
+        TODO Patrick/Michel Wird für’s Autocomplete verwendet, nutzt intern den Solr Terms-Request Handler.
       parameters:
         - $ref: '#/components/parameters/search_query'
       responses:
