@@ -3,6 +3,7 @@ info:
   title: API der Deutsche Digitalen Bibliothek
   version: 2.6.3-MB
   description: |
+    *Authors:* [Patrick Dinger](https://pro.deutsche-digitale-bibliothek.de/user/1570) and [Michael Büchner](https://pro.deutsche-digitale-bibliothek.de/user/37)
     ### Description
     The API is an [application programming interface](https://en.wikipedia.org/wiki/Application_programming_interface) that allows users to access data via methods provided by the [Deutsche Digitale Bibliothek (DDB)](https://www.deutsche-digitale-bibliothek.de/). It allows the development of a range of applications that use material in the DDB, displaying it as they see fit and embedding it in a variety of contexts. The API is available to all users who have registered with the DDB portal, as soon as they have set up an access code (‘API key’) in their “My DDB” area of the portal.
 
@@ -11,7 +12,6 @@ info:
     ### Licenses
     In general all metadata provided via the API is licensed [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en).  For binary data like images, video etc. DDB has introduced a licensing model that allows participating institutions to select from a bundle of licenses and license notices. If a reuse of this data is allowed must be checked in every case according to the information provided by the metadata.
     
-    **Authors:** Patrick Dinger, Michael Büchner
   contact:
     name: Service Point of the German Digital Library
     url: 'https://pro.deutsche-digitale-bibliothek.de/node/530'
@@ -22,7 +22,7 @@ info:
 servers:
   - description: Production
     url: 'https://api.deutsche-digitale-bibliothek.de/'
-  - description: Testing *Q1*
+  - description: Testing Q1
     url: 'https://api-q1.deutsche-digitale-bibliothek.de/'
   - description: Development (FIZ Karlsruhe)
     url: 'https://dev-ddb.fiz-karlsruhe.de/api/'
@@ -30,16 +30,16 @@ paths:
   '/binary/{uuid}':
     get:
       operationId: getBinaryUuid
-      summary: The method binary returns the content of a binary file of an item for a given item-ID.
+      summary: Returns the binary file of an item for a given item ID
       description: | 
         To request a binary of an item, the given [UUID](https://de.wikipedia.org/wiki/Universally_Unique_Identifier) of the object is required. The uuid of a binary can be retrieved via the HTTPS-GET-request '/items/{id}/binaries'. This method provides response data as application/octet-stream. A binary file at DDB can be a picture, a tumbnail of a picture, a video clip, an audio file etc.
         
         To retrieve the UUID, you need to insert the ID of a DDB-Object. Depending on the way you like to access the DDB-API, you must choose the component "binaries" for the method "/items/{id}/component" first.
         
-        It is possible to add any file extention to the uuid, which is ignored by the server, e.g. [`/binary/b59249a0-5c2d-4291-85d2-efb3554f786e.mp4`](https://api.deutsche-digitale-bibliothek.de/binary/b59249a0-5c2d-4291-85d2-efb3554f786e.mp4)
+        It is possible to add any file extention to the uuid, which is ignored by the server, e.g. `/binary/b59249a0-5c2d-4291-85d2-efb3554f786e.mp4`
       parameters:
         - $ref: '#/components/parameters/uuid'
-        # Binary-Methode funktioniert nicht für Bilder
+        # TODO: binary-method doesn't work for images (DDB-1400)
       responses:
         '200':
           description: Success
@@ -63,29 +63,29 @@ paths:
       tags:
         - binary
   '/entities':
-    # Veraltet!
+    # Deprecated
     $ref: '#/paths/~1search~1person'
   '/entities/facets':
-      # Veraltet!
+    # Deprecated
     $ref: '#/paths/~1search~1person~1facets'
   '/entities/facets/{facetName}':
-      # Veraltet!
+    # Deprecated
     $ref: '#/paths/~1search~1person~1facets~1%7BfacetName%7D'
   '/entities/facets/maxpages':
-      # Veraltet!
+    # Deprecated
     $ref: '#/paths/~1search~1person~1facets~1maxpages'
   '/entities/sortcriteria':
-      # Veraltet!
+    # Deprecated
     $ref: '#/paths/~1search~1person~1sortcriteria'
   '/entities/suggest':
-      # Veraltet!
+    # Deprecated
     $ref: '#/paths/~1search~1person~1suggest'
   '/institutions':
     get:
       operationId: getInstitution
-      summary: Returns a list of institutions which are registered at the DDB
+      summary: Returns a list of institutions, which are registered at DDB
       description: |
-        The JSON-Response contains an array of institution objects. Each object contains it’s display name, the internal cortex id, its geolocation in latitude and longitude and the sector it belongs to. The values for the sector are the same as returned by the sector facet. Each institution object may contain child institutions. These are nested into a property named children. This is an array containing institution JSON objects as described above. These institutions can again contain child institutions. If there are no child institutions the JSON array is empty.
+        The JSON-Response contains an array of institution objects. Each object contains it’s display name, the internal ID, its geolocation in latitude and longitude and the sector it belongs to. The values for the sector are the same as returned by the sector facet. Each institution object may contain child institutions. These are nested into a property named children. This is an array containing institution JSON objects as described above. These institutions can again contain child institutions. If there are no child institutions the JSON array is empty.
       parameters:
         - in: query
           name: hasItems
@@ -138,7 +138,7 @@ paths:
   '/institutions/sectors':
     get:
       operationId: getInstitutionSector
-      summary: Returns the list of available institution sectors at the DDB
+      summary: Returns a list of available sectors of institution registered at DDB
       description: |
         Each sector contains a name in the property value and the number of institutions that belong to this sector (count). As institutions can belong to multiple sectors, the overall sum of the different counts can be higher than the total number of institutions.
         
@@ -162,9 +162,10 @@ paths:
   '/institutions/map':
     get:
       operationId: getInstitutionMap
-      summary: Gets a list of institutions for a given cluster ID
-      description: This method returns a list of institutions for a given cluster ID.
-      # TODO What's a cluster ID?
+      summary: Returns a list of institutions for a given cluster ID
+      description: |
+        This method returns a list of institutions for a given cluster ID.
+        <!-- TODO: What's a cluster ID? -->
       parameters:
         - in: query
           name: clusterid
@@ -172,7 +173,8 @@ paths:
           schema:
             type: string
             default: -1
-          description: the cluster-id of the items to return
+          description: |
+            The cluster ID of the items to return.
         - in: query
           name: offset
           required: false
@@ -180,7 +182,8 @@ paths:
             type: integer
             format: int32
             default: 0
-          description: entry number of the first item of the result list to return
+          description: |
+            Entry number of the first item of the result list to return.
         - in: query
           name: length
           required: false
@@ -188,14 +191,16 @@ paths:
             type: integer
             format: int32
             default: -1
-          description: max number of items to return
+          description: |
+            Maximum number of items to return.
         - in: query
           name: hasItems
           required: false
           schema:
             type: boolean
             default: false
-          description: Show only institutions which have items
+          description: |
+            Show only institutions which have items.
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -215,8 +220,8 @@ paths:
   '/institutions/map/cluster':
     get:
       operationId: getInstitutionMapCluster
-      summary: This methode is not implemented.
-      description: This methode is not implemented.
+      summary: Not implemented.
+      description: This is not implemented.
       deprecated: true
       parameters:
         - in: query
@@ -246,10 +251,7 @@ paths:
       operationId: getItemsId
       summary: Returns the Archive Information Package (AIP) of a DDB item
       description: |
-        An AIP contains all available information of an item including a persistent identifier.
-        
-        *  FIZ:Kein Unterschied, außer dass dieser Endpounkt die Elemente unterhalb des EDM noch sortiert sortChildNodes(aip.getEdm().getAny().get(0)); Das aber auch nur wenn der Client JSON und nicht XML haben will. Wahrscheinlich sollten wir einfach eine der beiden Funktionen rausschmeißen. 
-
+        An AIP contains all available information of an item including a persistent identifier. All AIPs constist of the following components: *binaries*, *children*, *edm*, *indexing-profile*, *parents*, *source* and *view*.
       parameters:
         - $ref: '#/components/parameters/id'
       responses:
@@ -271,7 +273,7 @@ paths:
   '/items/{id}/aip':
     get:
       operationId: getItemsIdAip
-      summary: Returns a component of the Archive Information Package (AIP) of a DDB item
+      summary: Returns the Archive Information Package (AIP) of a DDB item
       description: |
         An AIP contains all available information of an item including a persistent identifier. All AIPs constist of the following components: *binaries*, *children*, *edm*, *indexing-profile*, *parent*, *source* and *view*.
       deprecated: true
@@ -296,9 +298,9 @@ paths:
   '/items/{id}/binaries':
     get:
       operationId: getItemsIdBinaries
-      summary: Returns a list of binary data files related to an item
+      summary: Returns a list of binary files related to the item
       description: |
-        The *binary* component is a list of binary data files related to an item for a given item-ID.
+        The *binary* component is a list of binary files related to an item for a given item ID.
       parameters:
         - $ref: '#/components/parameters/id'
       responses:
@@ -320,7 +322,7 @@ paths:
   '/items/{id}/children':
     get:
       operationId: getItemsIdChildren
-      summary: Returns metadata of a item, which are related to the inquired item and the child item
+      summary: Returns metadata of a item, which are related to the inquired item and the child items
       description: |
         The *children* component consists of metadata of the inquired item and all items, which are one level deeper (child item) in the hierarchy than the inquired item. The child items will be sorted according to the position field of the hierarchy nodes. If the position is the same the label will be used for sorting. The provided metadata can be empty if the item does not have any child items.
       parameters:
@@ -352,13 +354,13 @@ paths:
         - in: header
           name: accept-profile
           required: false
+          description: EDM data can have different matadata profiles. DDB API can deliver DDB Linked Data profile in any case and in some cases Europeana EDM profile. 
           schema:
             type: string
             default: https://www.deutsche-digitale-bibliothek.de/ns/ddb-linkedData-profile
             enum:
               - https://www.deutsche-digitale-bibliothek.de/ns/europeana-edm-profile
               - https://www.deutsche-digitale-bibliothek.de/ns/ddb-linkedData-profile
-          description: EDM data can have different profiles. DDB API can deliver DDB Linked Data profile in any case and in some cases Europeana EDM profile. 
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -399,7 +401,7 @@ paths:
         - Request_Header: []
       tags:
         - items
-  '/items/{id}/parent':
+  '/items/{id}/parents':
     get:
       operationId: getItemsIdParent
       summary: Returns metadata of a item, which are related to the inquired item and the parent, grandparent, etc. items
@@ -426,9 +428,9 @@ paths:
   '/items/{id}/source':
     get:
       operationId: getItemsIdSource
-      summary: TODO
+      summary: Returns the source metadata component of an item.
       description: |
-        TODO
+        Each DDB item has a `source/description`, which describes the original metadate from the provider. Im most cases a `source` does also have a `source/record`, which is the original metadate from the provider. The record is escaped XML data. The `record` of hierarchical metadaten is only stored at the root item.
       parameters:
         - $ref: '#/components/parameters/id'
       responses:
@@ -471,21 +473,44 @@ paths:
         - Request_Header: []
       tags:
         - items
-  '/items/{id}/source/{component}':
+  '/items/{id}/source/{subcomponent}':
     get:
       operationId: getItemsIdSourceComponent
-      summary: Returns a subcomponent of the Archive Information Package (AIP) component `source` of a DDB item
+      summary: Returns a subcomponent of the Archive Information Package (AIP) component `source` for an DDB item
       description: |
-        Each DDB-Object has a source/description and a source/record. Normaly, the unmasked content (source/record) will be returend by the API. DDB-Objekte, die aus einem hierarchischen Datenformat entstanden sind, haben bis auf das Wurzelobjekt keinen source/record. In der source/description wird auf das Wurzelobjekt verwiesen. (Die API antwortet mit dem Status Code „303 See Other“, und der Location (API-URL) des Wurzelobjekts, die aus der source/desciption stammt.)
+        Each DDB-Object has a `source/description` and may have a `source/record`.
         
-        TODO: Patrick
+        `source/description`: This subcomponent describes the original metadate from the provider. Where is the data from? What's the original matadata format? etc.
+        
+        **Example**
+        ```xml
+        <!-- API: https://api.deutsche-digitale-bibliotheke.de/items/ODF6RDESVIYFDQJYQGXYWI5V7L6YR675/source/description -->
+        <source:description id="ODF6RDESVIYFDQJYQGXYWI5V7L6YR675">
+            <desc:record
+              href="/items/P5DW7VEQ62P2HDFCCWKUG7N6TN2VANOS/source/record"
+              ref="P5DW7VEQ62P2HDFCCWKUG7N6TN2VANOS"
+              type="http://www.loc.gov/METS/">
+       
+              <desc:id type="mods:recordIdentifier" value="ZDB982364040_0050" />
+              <desc:id type="mets:div/@DMDID" value="DMDLOG_0044" />
+              <!-- Wichtig (!) für DFG-Viewer: -->
+              <desc:id type="mets:div/@ID" value="PHYS_0112" />
+       
+            </desc:record>
+        </source:description>
+        ```
+        
+        `source/record`: Im most cases a `source` does also have a `source/record`, which is the original metadate from the provider. The record is escaped XML data. The `record` of hierarchical metadaten is only stored at the root item (for more information look at `source/description`).
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
       parameters:
         - $ref: '#/components/parameters/id'
         - in: path
-          name: component
+          name: subcomponent
           required: true
           description: | 
-            Die Antworten dieser Methode fallen, jenachdem ob der Datenpartner bereits in einem  hierarchishen  Datenformat (METS/MODS, METS/TEI, EAD(DDB)) die Daten geliefert hat oder in einem nicht hierarischen (MARCXML, LIDO, denkXweb, ESE/DC, EDM) unterschiedlich aus. (MARCXML ist ein nicht-hierarchisches Datenformat, weil die einzelnen record auch losgelöst von der collection existieren können. MARCXML wird in der Regel als Collection geliefert und vor der Transformation/dem Ingest in einzelne Records zerlegt. Diese Record sind eigenständig und gegenüber dem Schema valide. Jeder Record (aus der Collection) wird im AIP des DDB-Objektes gespeichert. Die MARCXML-Collection als solche geht in der DDB verloren.)
+            Returns the subcomponent `description` or `record` of the component `source`.
           schema:
             type: string
             enum:
@@ -499,7 +524,7 @@ paths:
               schema:
                 type: object
         '303':
-          description: See Other
+          description: See Other. If the `source/record` is part of an the root DDB item. This only occurs, if the source is a hierarchical data format, like METS/MODS, METS/TEI, EAD(DDB), which won't or can't be split during the ingest process at DDB.
         '403':
           $ref: '#/components/responses/403'
         '404':
@@ -513,19 +538,21 @@ paths:
   '/search':
     get:
       operationId: getSearch
-      summary: Interface to the search engine of the DDB
+      summary: Returns the search result of the Solr search engine
       description: |
-        TODO Michael/Patrick
-        
-        The maximum count of rows is 1000.
+        DDB is using [Solr](https://lucene.apache.org/solr/) as search engine and is providing an interface to use this powerful enterprise-search platform. For more information about Solr see [Apache Solr Reference Guide](https://lucene.apache.org/solr/guide/).
       parameters:
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/search_facet'
         - in: query
           name: defaultOperator
+          description: Specifies the default operator for query expressions, overriding the default operator specified in the Solr schema.
           schema:
             type: string
-            description: TODO Michael Klären was das tut.
+            nullable: true
+            enum:
+              - AND
+              - OR
         - $ref: '#/components/parameters/search_facet.limit'
         - $ref: '#/components/parameters/search_minDocs'
         - $ref: '#/components/parameters/search_offset'
@@ -644,7 +671,8 @@ paths:
     get:
       operationId: getSearchCluster
       summary: Performs a search and clusters the results according to the aggregation field.
-      description: ??? Anmerkung Wird soweit ich das sehen konnte in der DDB nicht verwendet.
+      description: |
+        TODO (Anmerkung DvR: Wird soweit ich das sehen konnte in der DDB nicht verwendet.)
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -1399,7 +1427,10 @@ paths:
     get:
       operationId: getVersion
       summary: Returns the version of DDB-Backend
-      description: This method shows the version of DDB's backend software. #(TODO Should be version of the API!)
+      description: |
+        This method returns the version of DDB's backend software. 
+      
+        # TODO Should be version of the API!
       responses:
         '200':
             description: Success. Version der Backend-Software Cortex.
@@ -1759,7 +1790,7 @@ components:
         nullable: true
         default: '*'
       description: |
-        Term(s) to be searched. Must be URL-encoded and compliant to the SOLR Query Syntax.
+        Term(s) to be searched. Must be URL-encoded and compliant to the Solr Query Syntax.
     search_facet:
       in: query
       name: facet
@@ -1863,7 +1894,7 @@ components:
             - type
             - view
       description: |
-        This is the name of a facet which will be taken into account. Only facets which are supplied via a query parameter will be included into the result.
+        The name of facet(s), which will be taken into account. Only facets which are supplied via a query parameter will be included into the result.
         
         * *affiliate_fct:*
         * *apd_abstracts_fct:* See *apd_abstracts*.
@@ -2012,21 +2043,21 @@ components:
       schema:
         $ref: '#/components/parameters/search_apd_provenance/schema'
       description: |
-        $ref: '#/components/parameters/search_apd_provenance/description'
+        See `search_apd_provenance`.
     search_apd_reference_number_fct:
       in: query
       name: apd_reference_number_fct
       schema:
         $ref: '#/components/parameters/search_apd_reference_number/schema'
       description: |
-        $ref: '#/components/parameters/search_apd_reference_number/description'
+        See `search_apd_reference_number`.
     search_apd_subject_fct:
       in: query
       name: apd_subject_fct
       schema:
         $ref: '#/components/parameters/search_apd_subject/schema'
       description: |
-        $ref: '#/components/parameters/search_apd_subject/description'
+        See `search_apd_subject`.
     search_digitalisattype_fct:
       in: query
       name: digitalisattype_fct
@@ -2152,7 +2183,7 @@ components:
       schema:
         $ref: '#/components/parameters/search_affiliate_fct/schema'
       description: |
-        $ref: '#/components/parameters/search_affiliate_fct/description'
+        See `search_affiliate_fct`.
     search_affiliate_fct_involved:
       in: query
       name: affiliate_fct_involved
@@ -2407,7 +2438,7 @@ components:
       schema:
         $ref: '#/components/parameters/search_keywords_fct/schema'
       description: |
-        $ref: '#/components/parameters/search_keywords_fct/description'
+        See `search_keywords_fct`.
     search_label:
       in: query
       name: label
@@ -2421,7 +2452,7 @@ components:
       schema:
         $ref: '#/components/parameters/search_language_fct/schema'
       description: |
-        $ref: '#/components/parameters/search_language_fct/description'
+        See `search_language_fct`.
     search_last_update:
       in: query
       name: last_update
@@ -2463,14 +2494,14 @@ components:
       schema:
         $ref: '#/components/parameters/search_objecttype_fct/schema'
       description: |
-        $ref: '#/components/parameters/search_objecttype_fct/description'
+        See `search_objecttype_fct`.
     search_place:
       in: query
       name: place
       schema:
         $ref: '#/components/parameters/search_place_fct/schema'
       description: |
-        $ref: '#/components/parameters/search_place_fct/description'
+        See `search_place_fct/description`.
     search_preview:
       in: query
       name: preview
@@ -2491,7 +2522,7 @@ components:
       schema:
         $ref: '#/components/parameters/search_provider_fct/schema'
       description: |
-        $ref: '#/components/parameters/search_provider_fct/description'
+        See `search_provider_fct`.
     search_provider_id:
       in: query
       name: provider_id
@@ -2519,7 +2550,7 @@ components:
       schema:
         $ref: '#/components/parameters/search_sector_fct/schema'
       description: |
-        $ref: '#/components/parameters/search_sector_fct/description'
+        See `search_sector_fct`.
     search_signature:
       in: query
       name: signature
@@ -2554,7 +2585,7 @@ components:
       schema:
         $ref: '#/components/parameters/search_state_fct/schema'
       description: |
-        $ref: '#/components/parameters/search_state_fct/description'
+        See `search_state_fct`.
     search_subsector:
       in: query
       name: subsector
@@ -2589,7 +2620,7 @@ components:
       schema:
         $ref: '#/components/parameters/search_time_fct/schema'
       description: |
-        $ref: '#/components/parameters/search_time_fct/description'
+        See `search_time_fct`.
     search_title:
       in: query
       name: title
@@ -2603,7 +2634,7 @@ components:
       schema:
         $ref: '#/components/parameters/search_topic_fct/schema'
       description: |
-        $ref: '#/components/parameters/search_topic_fct/description'
+        See `search_topic_fct`.
     search_tp_category_id:
       in: query
       name: tp_category_id
@@ -2655,7 +2686,7 @@ components:
         format: int32
         minimum: 0
       description: |
-        This is the number of the first entry of the result.
+        The number of the first entry of the search result.
     search_rows:
       in: query
       name: rows
@@ -2667,7 +2698,7 @@ components:
         maximum: 1000
         default: 1000
       description: |
-        This is the count of result entries to be shown in total.
+        The count of result entries to be shown in total.
     search_sort:
       in: query
       name: sort
@@ -2729,7 +2760,7 @@ components:
             - spell_check
             - sort_field
       description: |
-        This is the name of a facet which will be taken into account. Only facets which are supplied via a query parameter will be included into the result.
+        The name of a facet(s), which will be taken into account. Only facets which are supplied via a query parameter will be included into the result.
         * *id:* 
         * *preferredName:* 
         * *count:* 
@@ -3032,7 +3063,7 @@ components:
             - spell_check
             - sort_field
       description: |
-        This is the name of a facet which will be taken into account. Only facets which are supplied via a query parameter will be included into the result.
+        The name of a facet(s), which will be taken into account. Only facets which are supplied via a query parameter will be included into the result.
         
         * *id:* 
         * *variant_id:* 
@@ -3461,13 +3492,10 @@ components:
     '200':
       description: Success
       content:
-        'application/json':
-          schema:
-            type: object
         'application/xml':
           schema:
             type: object
-        '*/*':
+        'application/json':
           schema:
             type: object
     '200-jsononly':
