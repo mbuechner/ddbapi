@@ -37,9 +37,9 @@ paths:
         To retrieve the UUID, you need to insert the ID of a DDB-Object. Depending on the way you like to access the DDB-API, you must choose the component "binaries" for the method "/items/{id}/component" first.
         
         It is possible to add any file extention to the uuid, which is ignored by the server, e.g. `/binary/b59249a0-5c2d-4291-85d2-efb3554f786e.mp4`
+        <!-- DDB-1400 -->
       parameters:
         - $ref: '#/components/parameters/uuid'
-        # TODO: binary-method doesn't work for images (DDB-1400)
       responses:
         '200':
           description: Success
@@ -165,7 +165,7 @@ paths:
       summary: Returns a list of institutions for a given cluster ID
       description: |
         This method returns a list of institutions for a given cluster ID.
-        <!-- TODO: What's a cluster ID? -->
+        <!-- TODO FIZ: What's a cluster ID? -->
       parameters:
         - in: query
           name: clusterid
@@ -670,9 +670,9 @@ paths:
   '/search/cluster':
     get:
       operationId: getSearchCluster
-      summary: Performs a search and clusters the results according to the aggregation field.
+      summary: Returns the clustered search result of the Solr search engine
       description: |
-        TODO (Anmerkung DvR: Wird soweit ich das sehen konnte in der DDB nicht verwendet.)
+        Performs a search and clusters the results according to the aggregation field.
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -794,23 +794,12 @@ paths:
   '/search/facets':
     get:
       operationId: getSearchFacets
-      summary: Returns all available facets or all available facets of a specific type
+      summary: Returns available facets
       description: |
-        TODO
-        
-        **TODO** FIZ: Warum geht das nicht?
+        Returns all available facets or all available facets of a specific type.
+        <!-- DDB-1409 -->
       parameters:
-        - in: query
-          name: type
-          required: false
-          schema:
-            type: string
-            enum:
-              - search
-              - extended
-              - technical
-          description: |
-            Facet type. If not selected all facets will be delivered.
+        - $ref: '#/components/parameters/type'
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -830,9 +819,9 @@ paths:
   '/search/facets/{facetName}':
     get:
       operationId: getSearchFacetsFacetName
-      summary: Returns all facet values for a given facet
+      summary: Returns facet values for a given facet
       description: | 
-        TODO arbeitet mit Solrs facet Funktion. Gibt alle Werte die in dem genannten Feld vorkommen zurück, inkl. Der Anzahl wie oft diese Werte vorkommen.
+        Returns all facet values with a count for a given facet.
       parameters:
         - in: path
           name: facetName
@@ -938,7 +927,7 @@ paths:
           required: false
           schema:
             type: string
-          description: ???
+          description: TODO FIZ (unklar wie das funktioniert und wofür das benutzt wird)
         # Inherit from /search
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/search_facet'
@@ -1059,8 +1048,10 @@ paths:
   '/search/facets/maxpages':
     get:
       operationId: getSearchFacetsMaxpage
-      summary: TODO
-      description: TODO FIZ (Wofür ist das?) Das gibt den Wert wieder der in der Backend Konfiguration als max Anzahl Seiten Suchergebnisse hinterlegt ist. Ich sehe aber nicht, dass das im Backend berücksichtigt wird und finde auch keine Verwendung dieser API-Methode im Frontend. 
+      summary: Returns maximum number of search result pages
+      description: | 
+        Returns maximum number of search result pages. This value isn't implemented yet and doesn't have any effect.
+        <!-- TODO FIZ (Wofür wird das benutzt?) --> 
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -1080,16 +1071,16 @@ paths:
   '/search/mlt':
     get:
       operationId: getSearchMlt
-      summary: Returns similar documents for a given object
+      summary: Returns similar items for an given item
       description: |
-        **More like this.** Returns a set of documents regarding a specific document defined by a search query. An Exemple for this method is the query
+        *More like this.* Returns a set of items regarding to an specific item defined by a search query. An Example for this method is the query
         ```
         Get
         /search/mlt?facet=id&id=JGTOPO2Z3KXX7UHSTQW6EORRN3R5W3UG&fields=place,title
         Host: api.deutsche-digitale-bibliothek.de
         Accept: */*
         ```
-        This query will provide similar documents regarding a document with the ID JGTOPO2Z3KXX7UHSTQW6EORRN3R5W3UG based on the information of its *place* and *affiliate* facets. It only return two documents beginning with the third one in list.
+        This query will provide similar items regarding to the item with the ID `JGTOPO2Z3KXX7UHSTQW6EORRN3R5W3UG` based on the information of its *place* and *affiliate* facets.
       parameters:
         # Method specific
         - name: fields
@@ -1100,7 +1091,7 @@ paths:
             items:
               type: string
           description: |
-            Index fields which will be used for comparison and obtaining similar documents
+            Index fields which will be used for comparison and obtaining similar items.
         # Inherit from /search
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/search_offset'
@@ -1124,9 +1115,9 @@ paths:
   '/search/sortcriteria':
     get:
       operationId: getSearchSortcriteria
-      summary: Returns the available sort criteria and the default criterion of the search result sets
+      summary: Returns sort criteria and the default criterion
       description: |
-        TODO
+        Returns all available sort criteria and the default criterion of search result sets.
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -1146,9 +1137,10 @@ paths:
   '/search/suggest':
     get:
       operationId: getSearchSuggest
-      summary: Returns suggestions for a given query
+      summary: Returns suggestions for a given search query
       description: |
-        TODO Patrick/Michel Wird für’s Autocomplete verwendet, nutzt intern den Solr Terms-Request Handler.
+        Returns suggestions for a given search query. This method does not work at the public API.
+        <!-- DDB-1410 -->
       parameters:
         - $ref: '#/components/parameters/search_query'
       responses:
@@ -1170,9 +1162,11 @@ paths:
   '/search/person':
     get:
       operationId: getSearchPerson
-      summary: Access to the the SOLR/Lucene search index of persons
+      summary: Returns the search result of the Solr search engine for persons/ individuals
       description: |
-        TODO
+        The [person pages](https://www.deutsche-digitale-bibliothek.de/search/person?query=*) are generated based on mentions in the metadata. All pages about individuals are searchable via a Solr search index.
+        
+        DDB is using [Solr](https://lucene.apache.org/solr/) as search engine and is providing an interface to use this powerful enterprise-search platform. For more information about Solr see [Apache Solr Reference Guide](https://lucene.apache.org/solr/guide/).
       parameters:
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/search_person_facet'
@@ -1232,8 +1226,9 @@ paths:
   '/search/person/facets':
     get:
       operationId: getSearchPersonFacets
-      summary: TODO
-      description: TODO
+      summary: Returns available facets from the search index of persons
+      description: |
+        Returns all available facets or all available facets of a specific type from the Solr search index of persons/ individuals.
       parameters:
         - $ref: '#/components/parameters/type'
       responses:
@@ -1255,8 +1250,9 @@ paths:
   '/search/person/facets/{facetName}':
     get:
       operationId: getSearchPersonFacetsFacetName
-      summary: TODO
-      description: TODO
+      summary: Returns facet values for a given facet from the search index of persons
+      description: | 
+        Returns all facet values with a count for a given facet from the Solr search index of persons/ individuals.
       parameters:
         - in: path
           name: facetName
@@ -1300,7 +1296,7 @@ paths:
           required: false
           schema:
             type: string
-          description: ???
+          description: TODO FIZ (unklar wie das funktioniert und wofür das benutzt wird)
         # Inherit from /search/person
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/search_person_facet'
@@ -1360,8 +1356,10 @@ paths:
   '/search/person/facets/maxpages':
     get:
       operationId: getSearchPersonFacetsMaxpages
-      summary: TODO
-      description: TODO
+      summary: Returns maximum number of search result pages from the search index of persons
+      description: | 
+        Returns maximum number of search result pages from the Solr search index of persons/ individuals.
+        <!-- DDB-1413 -->
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -1381,8 +1379,9 @@ paths:
   '/search/person/sortcriteria':
     get:
       operationId: getSearchPersonSortcriteria
-      summary: TODO
-      description: TODO
+      summary: Returns sort criteria and the default criterion from the search index of persons
+      description: |
+        Returns all available sort criteria and the default criterion of search result sets from the Solr serach index of persons/ individuals.
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -1402,9 +1401,9 @@ paths:
   '/search/person/suggest':
     get:
       operationId: getSearchPersonSuggest
-      summary: TODO
+      summary: Returns suggestions for a given search query from the search index of persons
       description: |
-        TODO Patrick/Michel Wird für’s Autocomplete verwendet, nutzt intern den Solr Terms-Request Handler.
+        Returns suggestions for a given search query from the Solr search index of persons/ individuals. This method does not work at the public API.
       parameters:
         - $ref: '#/components/parameters/search_query'
       responses:
@@ -1428,9 +1427,7 @@ paths:
       operationId: getVersion
       summary: Returns the version of DDB-Backend
       description: |
-        This method returns the version of DDB's backend software. 
-      
-        # TODO Should be version of the API!
+        This method returns the version of DDB's backend software.
       responses:
         '200':
             description: Success. Version der Backend-Software Cortex.
@@ -1452,8 +1449,11 @@ paths:
   '/search/organization':
     get:
       operationId: getSearchOrganization
-      summary: Access to the Lucene search index of organizations
-      description: TODO
+      summary: Returns the search result of the Solr search engine for organizations
+      description: |
+        The [organization pages](https://www.deutsche-digitale-bibliothek.de/search/organization?query=*) are generated based on mentions in the metadata. All pages about organizations are searchable via a Solr search index.
+        
+        DDB is using [Solr](https://lucene.apache.org/solr/) as search engine and is providing an interface to use this powerful enterprise-search platform. For more information about Solr see [Apache Solr Reference Guide](https://lucene.apache.org/solr/guide/).
       parameters:
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/search_organization_facet'
@@ -1534,8 +1534,9 @@ paths:
   '/search/organization/facets':
     get:
       operationId: getSearchOrganizationFacets
-      summary: TODO
-      description: TODO
+      summary: Returns available facets from the search index of organizations
+      description: |
+        Returns all available facets or all available facets of a specific type from the Solr search index of organizations.
       parameters:
         - $ref: '#/components/parameters/type'
       responses:
@@ -1557,8 +1558,9 @@ paths:
   '/search/organization/facets/{facetName}':
     get:
       operationId: getSearchOrganizationFacetsFacetName
-      summary: TODO
-      description: TODO
+      summary: Returns facet values for a given facet from the search index of organizations
+      description: | 
+        Returns all facet values with a count for a given facet from the Solr search index of organizations.
       parameters:
         - in: path
           name: facetName
@@ -1623,7 +1625,7 @@ paths:
           required: false
           schema:
             type: string
-          description: ???
+          description: TODO FIZ (unklar wie das funktioniert und wofür das benutzt wird)
         # Inherit from /search/organization
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/search_organization_facet'
@@ -1704,8 +1706,10 @@ paths:
   '/search/organization/facets/maxpages':
     get:
       operationId: getSearchOrganizationFacetsMaxpages
-      summary: TODO
-      description: TODO
+      summary: Returns maximum number of search result pages from the search index of organizations
+      description: | 
+        Returns maximum number of search result pages from the Solr search index of organizations.
+        <!-- DDB-1413 -->
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -1725,8 +1729,9 @@ paths:
   '/search/organization/sortcriteria':
     get:
       operationId: getSearchOrganizationSortcriteria
-      summary: TODO
-      description: TODO
+      summary: Returns sort criteria and the default criterion from the search index of organizations
+      description: |
+        Returns all available sort criteria and the default criterion of search result sets from the Solr serach index of organizations.
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -1746,9 +1751,9 @@ paths:
   '/search/organization/suggest':
     get:
       operationId: getSearchOrganizationSuggest
-      summary: TODO
+      summary: Returns suggestions for a given search query from the search index of organizations
       description: |
-        TODO Patrick/Michel Wird für’s Autocomplete verwendet, nutzt intern den Solr Terms-Request Handler.
+        Returns suggestions for a given search query from the Solr search index of organizations. This method does not work at the public API.
       parameters:
         - $ref: '#/components/parameters/search_query'
       responses:
@@ -3479,6 +3484,12 @@ components:
       required: false
       schema:
         type: string
+        enum:
+          - search
+          - extended
+          - technical
+      description: |
+        Facet type. If not selected all facets will be delivered.
     uuid:
       in: path
       name: uuid
