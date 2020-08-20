@@ -3709,18 +3709,7 @@ components:
         *Value must be*: `OAuth oauth_consumer_key="<your API key>"`
 tags:
   - name: binary
-    description: |
-      The method binary returns the content of a binary file of an item for a given item-ID. This method provides response data as application/octet-stream. A binary file at DDB can be a picture, a tumbnail of a picture, a video clip, an audio file etc.
   - name: institutions
-    description: |
-      The method institutions returns a list of institutions which are registered at the DDB. It is a read-only service and must be accessed with a
-      HTTP-GET-request.
   - name: items
-    description: |
-      Von der DDB erzeugter Datensatz, in der Regel mit Vorschaudateien, der ein physisches oder digitales Objekt beschreibt, das zum Erbe der deutschen Kultur und Wissenschaft gehört. Jedes DDB-Objekt hat im DDB-Portal eine DDB-Objektseite.
   - name: version
-    description: |
-      Versionierung
   - name: search
-    description: |
-      The method search is providing an interface to the search engine of the DDB.
