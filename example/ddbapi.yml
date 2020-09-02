@@ -1,16 +1,16 @@
 openapi: 3.0.3
 info:
-  title: API der Deutsche Digitalen Bibliothek
-  version: 2.6.3-MB
+  title: Deutsche Digitale Bibliothek REST API
+  version: 2.6.4-MB
   description: |
     *Authors:* [Patrick Dinger](https://pro.deutsche-digitale-bibliothek.de/user/1570) and [Michael Büchner](https://pro.deutsche-digitale-bibliothek.de/user/37)
     ### Description
-    The API is an [application programming interface](https://en.wikipedia.org/wiki/Application_programming_interface) that allows users to access data via methods provided by the [Deutsche Digitale Bibliothek (DDB)](https://www.deutsche-digitale-bibliothek.de/). It allows the development of a range of applications that use material in the DDB, displaying it as they see fit and embedding it in a variety of contexts. The API is available to all users who have registered with the DDB portal, as soon as they have set up an access code (‘API key’) in their “My DDB” area of the portal.
+    The API is an [application programming interface](https://en.wikipedia.org/wiki/Application_programming_interface) that allows users to access data via methods provided by the [Deutsche Digitale Bibliothek (DDB)](https://www.deutsche-digitale-bibliothek.de/). It allows the development of a range of applications that uses material in the DDB, displaying it as they see fit and embedding it in a variety of contexts. The API is available to all users who have registered with the DDB portal, as soon as they have set up an access code (‘API key’) in their “My DDB” area of the portal.
 
-    Users must verify their identity using an API key in order to use the Deutsche Digitale Bibliothek API. The key is a unique series of characters that has to be transmitted each time the user sends an enquiry to the API. All registered users of the Deutsche Digitale Bibliothek can obtain their personal authentication key for using the API. Keys can be issued once users are logged into their [DDB account (“My DDB”)](https://www.deutsche-digitale-bibliothek.de/user/apikey) at our portal and used in this interactive API documentation (“Authorize”) as well.
+    Users must verify their identity using an API key in order to use the API of the Deutsche Digitale Bibliothek. The key is a unique series of characters that has to be transmitted each time the user sends an enquiry to the API. All registered users of the Deutsche Digitale Bibliothek can obtain their personal authentication key for using the API. Keys can be issued once users are logged into their [DDB account (“My DDB”)](https://www.deutsche-digitale-bibliothek.de/user/apikey) at our portal and used in this interactive API documentation (“Authorize”) as well.
     
     ### Licenses
-    In general all metadata provided via the API is licensed [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en).  For binary data like images, video etc. DDB has introduced a licensing model that allows participating institutions to select from a bundle of licenses and license notices. If a reuse of this data is allowed must be checked in every case according to the information provided by the metadata.
+    In general all metadata provided via the API is licensed [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en).  For binary data like images, videos etc. DDB has introduced a licensing model that allows participating institutions to select from a bundle of licenses and license notices. If a reuse of this data is allowed must be checked in every case according to the information provided by the metadata.
     
   contact:
     name: Service Point of the German Digital Library
@@ -32,11 +32,12 @@ paths:
       operationId: getBinaryUuid
       summary: Returns the binary file of an item for a given item ID
       description: | 
-        To request a binary of an item, the given [UUID](https://de.wikipedia.org/wiki/Universally_Unique_Identifier) of the object is required. The uuid of a binary can be retrieved via the HTTPS-GET-request '/items/{id}/binaries'. This method provides response data as application/octet-stream. A binary file at DDB can be a picture, a tumbnail of a picture, a video clip, an audio file etc.
-        
+        To request a binary of an item, the given [UUID](https://de.wikipedia.org/wiki/Universally_Unique_Identifier) of the object is required. The uuid of a binary can be retrieved via the HTTPS-GET-request '/items/{id}/binaries'. 
         To retrieve the UUID, you need to insert the ID of a DDB-Object. Depending on the way you like to access the DDB-API, you must choose the component "binaries" for the method "/items/{id}/component" first.
         
-        It is possible to add any file extention to the uuid, which is ignored by the server, e.g. `/binary/b59249a0-5c2d-4291-85d2-efb3554f786e.mp4`
+        The method '/binary/{uuid}' provides response data as application/octet-stream. A binary file at DDB can be a picture, a tumbnail of a picture, a video clip, an audio file etc.
+        
+        It is possible to add any file extension to the uuid, which is ignored by the server, e.g. `/binary/b59249a0-5c2d-4291-85d2-efb3554f786e.mp4`
         <!-- DDB-1400 -->
       parameters:
         - $ref: '#/components/parameters/uuid'
@@ -85,7 +86,7 @@ paths:
       operationId: getInstitution
       summary: Returns a list of institutions, which are registered at DDB
       description: |
-        The JSON-Response contains an array of institution objects. Each object contains it’s display name, the internal ID, its geolocation in latitude and longitude and the sector it belongs to. The values for the sector are the same as returned by the sector facet. Each institution object may contain child institutions. These are nested into a property named children. This is an array containing institution JSON objects as described above. These institutions can again contain child institutions. If there are no child institutions the JSON array is empty.
+        The JSON-Response contains an array of institution objects. Each object contains it’s display name, the internal ID, its geolocation in latitude and longitude and the sector it belongs to. The values for the sector are the same as the values which are returned by the sector facet. Each institution object may contain child institutions. These are nested into a property named children. This is an array containing institution JSON objects as described above. The institutions can again contain child institutions. If there are no child institutions the JSON array is empty.
       parameters:
         - in: query
           name: hasItems
@@ -251,7 +252,7 @@ paths:
       operationId: getItemsId
       summary: Returns the Archive Information Package (AIP) of a DDB item
       description: |
-        An AIP contains all available information of an item including a persistent identifier. All AIPs constist of the following components: *binaries*, *children*, *edm*, *indexing-profile*, *parents*, *source* and *view*.
+        An AIP contains all available information of an item including a persistent identifier. All AIPs consist of the following components: *binaries*, *children*, *edm*, *indexing-profile*, *parents*, *source* and *view*.
       parameters:
         - $ref: '#/components/parameters/id'
       responses:
@@ -275,7 +276,7 @@ paths:
       operationId: getItemsIdAip
       summary: Returns the Archive Information Package (AIP) of a DDB item
       description: |
-        An AIP contains all available information of an item including a persistent identifier. All AIPs constist of the following components: *binaries*, *children*, *edm*, *indexing-profile*, *parent*, *source* and *view*.
+        An AIP contains all available information of an item including a persistent identifier. All AIPs consist of the following components: *binaries*, *children*, *edm*, *indexing-profile*, *parent*, *source* and *view*.
       deprecated: true
       parameters:
         - $ref: '#/components/parameters/id'
@@ -300,7 +301,7 @@ paths:
       operationId: getItemsIdBinaries
       summary: Returns a list of binary files related to the item
       description: |
-        The *binary* component is a list of binary files related to an item for a given item ID.
+        The *binary* component displays a list of binary files related to an item for a given item ID.
       parameters:
         - $ref: '#/components/parameters/id'
       responses:
@@ -322,7 +323,7 @@ paths:
   '/items/{id}/children':
     get:
       operationId: getItemsIdChildren
-      summary: Returns metadata of a item, which are related to the inquired item and the child items
+      summary: Returns metadata of an item, which are related to the inquired item and the child items
       description: |
         The *children* component consists of metadata of the inquired item and all items, which are one level deeper (child item) in the hierarchy than the inquired item. The child items will be sorted according to the position field of the hierarchy nodes. If the position is the same the label will be used for sorting. The provided metadata can be empty if the item does not have any child items.
       parameters:
@@ -348,13 +349,13 @@ paths:
       operationId: getItemsIdEdm
       summary: Returns the Europeana Data Model (EDM)
       description: |
-        The *edm* component is metadata in the Europeana Data Model. Different profiles are supported by this method.
+        The *edm* component displays the metadata of an item in the Europeana Data Model. Different profiles are supported by this method.
       parameters:
         - $ref: '#/components/parameters/id'
         - in: header
           name: accept-profile
           required: false
-          description: EDM data can have different matadata profiles. DDB API can deliver DDB Linked Data profile in any case and in some cases Europeana EDM profile. 
+          description: EDM data can have different metadata profiles. DDB API can deliver DDB Linked Data profile in any case and in some cases Europeana EDM profile. 
           schema:
             type: string
             default: https://www.deutsche-digitale-bibliothek.de/ns/ddb-linkedData-profile
@@ -404,9 +405,9 @@ paths:
   '/items/{id}/parents':
     get:
       operationId: getItemsIdParent
-      summary: Returns metadata of a item, which are related to the inquired item and the parent, grandparent, etc. items
+      summary: Returns metadata of an item, which are related to the inquired item as well as the parent, grandparent, etc. items
       description: |
-        The *parents* component consists of metadata of the inquired item and of these items which are related to the inquired item and which are one or more levels higher (parent, grandparent ... item) in the hierarchy than the inquired item. This means that all parent items up to the root item will be provided. The provided metadata can be empty if the item does not have any parent items.
+        The *parents* component consists of metadata of the inquired item and of the items which are related to the inquired item as well as to objects which are one or more levels higher (parent, grandparent ... item) in the hierarchy than the inquired item. This means that all parent items up to the root item will be provided. The provided metadata will be empty if the item does not have any parent items.
       parameters:
         - $ref: '#/components/parameters/id'
       responses:
@@ -430,7 +431,7 @@ paths:
       operationId: getItemsIdSource
       summary: Returns the source metadata component of an item.
       description: |
-        Each DDB item has a `source/description`, which describes the original metadate from the provider. Im most cases a `source` does also have a `source/record`, which is the original metadate from the provider. The record is escaped XML data. The `record` of hierarchical metadaten is only stored at the root item.
+        Each DDB item has a `source/description`, which describes the original metadate from the provider. In most cases a `source` does also have a `source/record`, which is the original metadate from the provider. The record is escaped XML data. The `record` of hierarchical metadata is only stored at the root item.
       parameters:
         - $ref: '#/components/parameters/id'
       responses:
@@ -454,7 +455,7 @@ paths:
       operationId: getItemsIdView
       summary: Returns the view of an item
       description: |
-        The component *view* is the view of an item. A view is the data set a frontend page at DDB is based on. 
+        The component *view* displaxs the view of an item. A view is the data set the frontend page of an iten is based on. 
       parameters:
         - $ref: '#/components/parameters/id'
       responses:
@@ -500,7 +501,7 @@ paths:
         </source:description>
         ```
         
-        `source/record`: Im most cases a `source` does also have a `source/record`, which is the original metadate from the provider. The record is escaped XML data. The `record` of hierarchical metadaten is only stored at the root item (for more information look at `source/description`).
+        `source/record`: In most cases a `source` does also have a `source/record`, which is the original metadate from the provider. The record is escaped XML data. The `record` of hierarchical metadata is only stored at the root item (for more information look at `source/description`).
       security: 
         - Query_Parameter: []
         - Request_Header: []
@@ -540,7 +541,7 @@ paths:
       operationId: getSearch
       summary: Returns the search result of the Solr search engine
       description: |
-        DDB is using [Solr](https://lucene.apache.org/solr/) as search engine and is providing an interface to use this powerful enterprise-search platform. For more information about Solr see [Apache Solr Reference Guide](https://lucene.apache.org/solr/guide/).
+        The DDB is using [Solr](https://lucene.apache.org/solr/) as search engine and is providing an interface to use this powerful enterprise-search platform. For more information about Solr see [Apache Solr Reference Guide](https://lucene.apache.org/solr/guide/).
       parameters:
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/search_facet'
@@ -1073,7 +1074,7 @@ paths:
       operationId: getSearchMlt
       summary: Returns similar items for an given item
       description: |
-        *More like this.* Returns a set of items regarding to an specific item defined by a search query. An Example for this method is the query
+        *More like this.* Returns a set of items regarding to a specific item defined by a search query. An Example for this method is the query
         ```
         Get
         /search/mlt?facet=id&id=JGTOPO2Z3KXX7UHSTQW6EORRN3R5W3UG&fields=place,title
@@ -1166,7 +1167,7 @@ paths:
       description: |
         The [person pages](https://www.deutsche-digitale-bibliothek.de/search/person?query=*) are generated based on mentions in the metadata. All pages about individuals are searchable via a Solr search index.
         
-        DDB is using [Solr](https://lucene.apache.org/solr/) as search engine and is providing an interface to use this powerful enterprise-search platform. For more information about Solr see [Apache Solr Reference Guide](https://lucene.apache.org/solr/guide/).
+        The DDB is using [Solr](https://lucene.apache.org/solr/) as search engine and is providing an interface to use this powerful enterprise-search platform. For more information about Solr see [Apache Solr Reference Guide](https://lucene.apache.org/solr/guide/).
       parameters:
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/search_person_facet'
@@ -1381,7 +1382,7 @@ paths:
       operationId: getSearchPersonSortcriteria
       summary: Returns sort criteria and the default criterion from the search index of persons
       description: |
-        Returns all available sort criteria and the default criterion of search result sets from the Solr serach index of persons/ individuals.
+        Returns all available sort criteria and the default criterion of search result sets from the Solr search index of persons/ individuals.
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -1453,7 +1454,7 @@ paths:
       description: |
         The [organization pages](https://www.deutsche-digitale-bibliothek.de/search/organization?query=*) are generated based on mentions in the metadata. All pages about organizations are searchable via a Solr search index.
         
-        DDB is using [Solr](https://lucene.apache.org/solr/) as search engine and is providing an interface to use this powerful enterprise-search platform. For more information about Solr see [Apache Solr Reference Guide](https://lucene.apache.org/solr/guide/).
+        The DDB is using [Solr](https://lucene.apache.org/solr/) as search engine and is providing an interface to use this powerful enterprise-search platform. For more information about Solr see [Apache Solr Reference Guide](https://lucene.apache.org/solr/guide/).
       parameters:
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/search_organization_facet'
@@ -1731,7 +1732,7 @@ paths:
       operationId: getSearchOrganizationSortcriteria
       summary: Returns sort criteria and the default criterion from the search index of organizations
       description: |
-        Returns all available sort criteria and the default criterion of search result sets from the Solr serach index of organizations.
+        Returns all available sort criteria and the default criterion of search result sets from the Solr search index of organizations.
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -3556,7 +3557,7 @@ components:
               name: error
               namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
       description: |
-        Forbidden. Es wurde kein API-Key übermittelt oder der API-Key hat keine Berechtigung auf die Ressource zuzugreifen.
+        Forbidden. The security level of the API-key does not allow access to this method or no API-key was send.
     '404':
       content:
         'application/json':
@@ -3598,7 +3599,7 @@ components:
               name: error
               namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
       description: |
-        Not found. Die API-Methode oder das angeforderte DDB-Objekt existiert nicht bzw. konnte nicht gefunden werden.
+        Not found. The requested methode or object does not exist or could no be found.
     '406':
       content:
         'application/json':
@@ -3640,7 +3641,7 @@ components:
               name: error
               namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
       description: |
-        Not Acceptable. Der Request kann nicht beantwortet werden. Ggf. enthält der Request Header Fehler oder es wurde ein Format (Accept-Feld) angefordert, das der Server nicht liefern kann.
+        Not Acceptable. There might be an error in the request Header or the choosen application format is not availeble.
     '413':
       description: |
         The HTTP 413 Payload Too Large response status code indicates that the  request entity is larger than limits defined by server; the server might  close the connection or return a Retry-After header field.
@@ -3689,7 +3690,7 @@ components:
               name: error
               namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
       description: |
-        Server Error. Es gab ein schwerwiegendes Serverproblem beim Bearbeiten der Anfrage. Weitere Details befinden sich in der Antwort des Servers.
+        Server Error. There has been a fatal Error. Further information will be displayed in the Server response.
   securitySchemes:
     Query_Parameter:
       type: apiKey
