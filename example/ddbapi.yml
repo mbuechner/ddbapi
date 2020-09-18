@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Deutsche Digitale Bibliothek REST API
-  version: 2.6.4-MB
+  version: 2.6.5
   description: |
     *Authors:* Patrick Dinger and [Michael Büchner](https://pro.deutsche-digitale-bibliothek.de/user/37)
     ### Description
@@ -63,24 +63,24 @@ paths:
           $ref: '#/components/responses/500'
       tags:
         - binary
-  '/entities':
+#  '/entities':
     # Deprecated
-    $ref: '#/paths/~1search~1person'
-  '/entities/facets':
+#    $ref: '#/paths/~1search~1person'
+#  '/entities/facets':
     # Deprecated
-    $ref: '#/paths/~1search~1person~1facets'
-  '/entities/facets/{facetName}':
+#    $ref: '#/paths/~1search~1person~1facets'
+#  '/entities/facets/{facetName}':
     # Deprecated
-    $ref: '#/paths/~1search~1person~1facets~1%7BfacetName%7D'
-  '/entities/facets/maxpages':
+#    $ref: '#/paths/~1search~1person~1facets~1%7BfacetName%7D'
+#  '/entities/facets/maxpages':
     # Deprecated
-    $ref: '#/paths/~1search~1person~1facets~1maxpages'
-  '/entities/sortcriteria':
+#    $ref: '#/paths/~1search~1person~1facets~1maxpages'
+#  '/entities/sortcriteria':
     # Deprecated
-    $ref: '#/paths/~1search~1person~1sortcriteria'
-  '/entities/suggest':
+#    $ref: '#/paths/~1search~1person~1sortcriteria'
+#  '/entities/suggest':
     # Deprecated
-    $ref: '#/paths/~1search~1person~1suggest'
+#    $ref: '#/paths/~1search~1person~1suggest'
   '/institutions':
     get:
       operationId: getInstitution
@@ -1080,7 +1080,7 @@ paths:
         Host: api.deutsche-digitale-bibliothek.de
         Accept: */*
         ```
-        This query will provide similar items regarding to the item with the ID `JGTOPO2Z3KXX7UHSTQW6EORRN3R5W3UG` based on the information of its *place* and *affiliate* facets.
+        This query will provide similar items regarding to the item with the ID JGTOPO2Z3KXX7UHSTQW6EORRN3R5W3UG based on the information of its *place* and *affiliate* facets.
       parameters:
         # Method specific
         - name: fields
