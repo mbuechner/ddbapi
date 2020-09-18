@@ -3,7 +3,7 @@ info:
   title: Deutsche Digitale Bibliothek REST API
   version: 2.6.4-MB
   description: |
-    *Authors:* [Patrick Dinger](https://pro.deutsche-digitale-bibliothek.de/user/1570) and [Michael Büchner](https://pro.deutsche-digitale-bibliothek.de/user/37)
+    *Authors:* Patrick Dinger and [Michael Büchner](https://pro.deutsche-digitale-bibliothek.de/user/37)
     ### Description
     The API is an [application programming interface](https://en.wikipedia.org/wiki/Application_programming_interface) that allows users to access data via methods provided by the [Deutsche Digitale Bibliothek (DDB)](https://www.deutsche-digitale-bibliothek.de/). It allows the development of a range of applications that uses material in the DDB, displaying it as they see fit and embedding it in a variety of contexts. The API is available to all users who have registered with the DDB portal, as soon as they have set up an access code (‘API key’) in their “My DDB” area of the portal.
 
@@ -32,18 +32,18 @@ paths:
       operationId: getBinaryUuid
       summary: Returns the binary file of an item for a given item ID
       description: | 
-        To request a binary of an item, the given [UUID](https://de.wikipedia.org/wiki/Universally_Unique_Identifier) of the object is required. The uuid of a binary can be retrieved via the HTTPS-GET-request '/items/{id}/binaries'. 
-        To retrieve the UUID, you need to insert the ID of a DDB-Object. Depending on the way you like to access the DDB-API, you must choose the component "binaries" for the method "/items/{id}/component" first.
+        To request a binary of an item, the given [UUID](https://de.wikipedia.org/wiki/Universally_Unique_Identifier) of the resource is required. The uuid of a binary can be retrieved via the HTTPS-GET-request `/items/{id}/binaries`. 
+        To retrieve the UUID, you need to insert the ID of a DDB item. Depending on the way you like to access the DDB-API, you must choose the component `binaries` for the method `/items/{id}/{component}` first.
         
-        The method '/binary/{uuid}' provides response data as application/octet-stream. A binary file at DDB can be a picture, a tumbnail of a picture, a video clip, an audio file etc.
+        The method `/binary/{uuid}` provides response data as application/octet-stream. A binary file at DDB can be a picture, a tumbnail of a picture, a video clip, an audio file etc.
         
-        It is possible to add any file extension to the uuid, which is ignored by the server, e.g. `/binary/b59249a0-5c2d-4291-85d2-efb3554f786e.mp4`
+        It is possible to add any file extension to the uuid, which is ignored by the server, e.g. [/binary/b59249a0-5c2d-4291-85d2-efb3554f786e.mp4](https://api.deutsche-digitale-bibliothek.de/binary/b59249a0-5c2d-4291-85d2-efb3554f786e.mp4)
         <!-- DDB-1400 -->
       parameters:
         - $ref: '#/components/parameters/uuid'
       responses:
         '200':
-          description: Success
+          description: Success.
           content:
             application/octet-stream:
               schema:
@@ -86,7 +86,7 @@ paths:
       operationId: getInstitution
       summary: Returns a list of institutions, which are registered at DDB
       description: |
-        The JSON-Response contains an array of institution objects. Each object contains it’s display name, the internal ID, its geolocation in latitude and longitude and the sector it belongs to. The values for the sector are the same as the values which are returned by the sector facet. Each institution object may contain child institutions. These are nested into a property named children. This is an array containing institution JSON objects as described above. The institutions can again contain child institutions. If there are no child institutions the JSON array is empty.
+        The JSON-Response contains an array of institution items. Each object contains it’s display name, the internal ID, its geolocation in latitude and longitude and the sector it belongs to. The values for the sector are the same as the values which are returned by the sector facet. Each institution object may contain child institutions. These are nested into a property named children. This is an array containing institution JSON objects as described above. The institutions can again contain child institutions. If there are no child institutions the JSON array is empty.
       parameters:
         - in: query
           name: hasItems
@@ -166,7 +166,7 @@ paths:
       summary: Returns a list of institutions for a given cluster ID
       description: |
         This method returns a list of institutions for a given cluster ID.
-        <!-- TODO FIZ: What's a cluster ID? -->
+      deprecated: true
       parameters:
         - in: query
           name: clusterid
@@ -455,7 +455,7 @@ paths:
       operationId: getItemsIdView
       summary: Returns the view of an item
       description: |
-        The component *view* displaxs the view of an item. A view is the data set the frontend page of an iten is based on. 
+        The component *view* displays the view of an item. A view is the data set the frontend page of an iten is based on. 
       parameters:
         - $ref: '#/components/parameters/id'
       responses:
@@ -479,7 +479,7 @@ paths:
       operationId: getItemsIdSourceComponent
       summary: Returns a subcomponent of the Archive Information Package (AIP) component `source` for an DDB item
       description: |
-        Each DDB-Object has a `source/description` and may have a `source/record`.
+        Each DDB item has a `source/description` and may have a `source/record`.
         
         `source/description`: This subcomponent describes the original metadate from the provider. Where is the data from? What's the original matadata format? etc.
         
@@ -519,7 +519,7 @@ paths:
               - description
       responses:
         '200':
-          description: Success
+          description: Success.
           content:
             application/xml:
               schema:
@@ -924,13 +924,12 @@ paths:
               - view
           description: Name of the facet which should be searched.
         - in: query
-          name: searchQuery
+          name: query
           required: false
           schema:
             type: string
-          description: TODO FIZ (unklar wie das funktioniert und wofür das benutzt wird)
+          description: Term(s) to be searched in the selected facet. This must be compliant to the Solr Query Syntax.
         # Inherit from /search
-        - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/search_facet'
         - $ref: '#/components/parameters/search_facet.limit'
         - $ref: '#/components/parameters/search_minDocs'
@@ -1052,7 +1051,7 @@ paths:
       summary: Returns maximum number of search result pages
       description: | 
         Returns maximum number of search result pages. This value isn't implemented yet and doesn't have any effect.
-        <!-- TODO FIZ (Wofür wird das benutzt?) --> 
+      deprecated: true
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -1292,12 +1291,6 @@ paths:
               - spell_check
               - sort_field
           description: Name of the facet which should be searched.
-        - in: query
-          name: searchQuery
-          required: false
-          schema:
-            type: string
-          description: TODO FIZ (unklar wie das funktioniert und wofür das benutzt wird)
         # Inherit from /search/person
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/search_person_facet'
@@ -1361,6 +1354,7 @@ paths:
       description: | 
         Returns maximum number of search result pages from the Solr search index of persons/ individuals.
         <!-- DDB-1413 -->
+      deprecated: true
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -1621,12 +1615,6 @@ paths:
               - spell_check
               - sort_field
           description: Name of the facet which should be searched.
-        - in: query
-          name: searchQuery
-          required: false
-          schema:
-            type: string
-          description: TODO FIZ (unklar wie das funktioniert und wofür das benutzt wird)
         # Inherit from /search/organization
         - $ref: '#/components/parameters/search_query'
         - $ref: '#/components/parameters/search_organization_facet'
@@ -1711,6 +1699,7 @@ paths:
       description: | 
         Returns maximum number of search result pages from the Solr search index of organizations.
         <!-- DDB-1413 -->
+      deprecated: true
       responses:
         '200':
           $ref: '#/components/responses/200-jsononly'
@@ -1784,9 +1773,7 @@ components:
         maxLength: 32
         minLength: 32
       description: |
-        ID of DDB item which is a BASE32 encoded SHA1 hash value.
-        
-        See [https://pro.deutsche-digitale-bibliothek.de/node/782](https://pro.deutsche-digitale-bibliothek.de/node/782)
+        ID of DDB item which is a BASE32 encoded SHA1 hash value. See [https://pro.deutsche-digitale-bibliothek.de/node/782](https://pro.deutsche-digitale-bibliothek.de/node/782).
     search_query:
       in: query
       name: query
@@ -1935,7 +1922,7 @@ components:
         * *apd_context:*
         * *apd_document_type:*
         * *apd_keywords:*
-        * *apd_level_of_description: *
+        * *apd_level_of_description:*
         * *apd_material:*
         * *apd_provenance:*
         * *apd_reference_number:*
@@ -1948,7 +1935,7 @@ components:
         * *context:*
         * *dataset_id:*
         * *dataset_label:*
-        * *description: *
+        * *description:*
         * *digitalCopyType:*
         * *digitalisat:*
         * *end_time:*
@@ -2716,7 +2703,7 @@ components:
         * `ALPHA_ASC`- Ascending alphanumeric sort order
         * `ALPHA_DESC` - descending alphanumeric sort order
         * `RELEVANCE` - Sorted by relevance
-        * `RANDOM_<my_seed>` - Random sort order (identical seeds will get the same order at any time)
+        * `RANDOM_<a_random_seed>` - Random sort order (identical seeds will get the same order at any time)
     search_cursorMark:
       in: query
       name: cursorMark
@@ -3085,7 +3072,7 @@ components:
         * *count_sec_06:* 
         * *count_sec_07:* 
         * *label:* 
-        * *description: * 
+        * *description:* 
         * *subsector_fct:* 
         * *sector_fct:* 
         * *topic_fct:* 
@@ -3502,7 +3489,7 @@ components:
         maxLength: 36
   responses:
     '200':
-      description: Success
+      description: Success.
       content:
         'application/xml':
           schema:
@@ -3511,7 +3498,7 @@ components:
           schema:
             type: object
     '200-jsononly':
-      description: Success
+      description: Success.
       content:
         'application/json':
           schema:
@@ -3599,7 +3586,7 @@ components:
               name: error
               namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
       description: |
-        Not found. The requested methode or object does not exist or could no be found.
+        Not found. The requested method or resource does not exist or could no be found.
     '406':
       content:
         'application/json':
@@ -3641,10 +3628,10 @@ components:
               name: error
               namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
       description: |
-        Not Acceptable. There might be an error in the request Header or the choosen application format is not availeble.
+        Not Acceptable. There might be an error in the request header or the choosen application format is not available.
     '413':
       description: |
-        The HTTP 413 Payload Too Large response status code indicates that the  request entity is larger than limits defined by server; the server might  close the connection or return a Retry-After header field.
+        Payload Too Large. Indicates that the request entity is larger than limits defined by server.
     '500':
       content:
         'application/json':
@@ -3690,7 +3677,7 @@ components:
               name: error
               namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
       description: |
-        Server Error. There has been a fatal Error. Further information will be displayed in the Server response.
+        Server Error. There has been a fatal error. Further information will be displayed in the server response.
   securitySchemes:
     Query_Parameter:
       type: apiKey
