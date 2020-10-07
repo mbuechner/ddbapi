@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Deutsche Digitale Bibliothek REST API
-  version: 2.6.5
+  version: 1.0
   description: |
     *Authors:* Patrick Dinger and [Michael Büchner](https://pro.deutsche-digitale-bibliothek.de/user/37)
     ### Description
@@ -166,16 +166,7 @@ paths:
       summary: Returns a list of institutions for a given cluster ID
       description: |
         This method returns a list of institutions for a given cluster ID.
-      deprecated: true
       parameters:
-        - in: query
-          name: clusterid
-          required: false
-          schema:
-            type: string
-            default: -1
-          description: |
-            The cluster ID of the items to return.
         - in: query
           name: offset
           required: false
@@ -1066,6 +1057,50 @@ paths:
       security: 
         - Query_Parameter: []
         - Request_Header: []
+      tags:
+        - search
+  '/search/index/{indexname}/{requesthandler}':
+    get: 
+      operationId: getSolrSearch
+      summary: Performs a search on a Solr index.
+      description: |
+        Provides the full functionality of Solr searches. The available request handlers are limited by the backend configuration. The available parameters and their possible values depend on the used requesthandler. 
+        
+        All parameters are passed on to the underlying Solr. Available parameters therefore depend on the request handler.
+      parameters: 
+        - in: path
+          name: indexname
+          required: true
+          schema:
+            type: string
+            enum:
+              - search 
+              - nodes
+              - person
+              - organization
+              - newspaper
+              - newspaper-issues
+          description: The name of the Solr index (aka. collection, core) to be queried
+        - in: path
+          name: requesthandler
+          required: true
+          schema:
+            type: string
+            enum:
+              - select
+              - terms
+              - newspaper-search
+              - get
+          description: The Solr request handler to use for querying.
+      responses:
+        '200':
+          $ref: '#/components/responses/200-jsononly'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
       tags:
         - search
   '/search/mlt':
