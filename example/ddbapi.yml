@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Deutsche Digitale Bibliothek REST API
-  version: 1.0
+  version: '1.0'
   description: |
     *Authors:* Patrick Dinger and [Michael Büchner](https://pro.deutsche-digitale-bibliothek.de/user/37)
     ### Description
@@ -14,18 +14,18 @@ info:
     
   contact:
     name: Service Point of the German Digital Library
-    url: 'https://pro.deutsche-digitale-bibliothek.de/node/530'
+    url: https://pro.deutsche-digitale-bibliothek.de/node/530
   license:
     name: Apache 2.0
-    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-  termsOfService: 'https://www.deutsche-digitale-bibliothek.de/content/impressum'
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: https://www.deutsche-digitale-bibliothek.de/content/impressum
 servers:
   - description: Production
-    url: 'https://api.deutsche-digitale-bibliothek.de/'
+    url: https://api.deutsche-digitale-bibliothek.de/
   - description: Testing Q1
-    url: 'https://api-q1.deutsche-digitale-bibliothek.de/'
+    url: https://api-q1.deutsche-digitale-bibliothek.de/
   - description: Development (FIZ Karlsruhe)
-    url: 'https://dev-ddb.fiz-karlsruhe.de/api/'
+    url: https://dev-ddb.fiz-karlsruhe.de/api/
 paths:
   '/binary/{uuid}':
     get:
