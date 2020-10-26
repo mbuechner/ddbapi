@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Deutsche Digitale Bibliothek REST API
-  version: '1.0'
+  version: '6.6.1'
   description: |
     *Authors:* Patrick Dinger and [Michael Büchner](https://pro.deutsche-digitale-bibliothek.de/user/37)
     ### Description
