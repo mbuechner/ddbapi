@@ -1,5 +1,4 @@
 #! /bin/sh
-
 set -e
 
 NGINX_ROOT=/usr/share/nginx/html
