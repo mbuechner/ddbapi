@@ -11,12 +11,9 @@ then
 	# Run Swagger script, but without last line
 	echo "Remove: $LAST_LINE"
 	sed -i "/$LAST_LINE/d" $NGINX_ROOT/../run.sh
-fi
-
-$NGINX_ROOT/../run.sh
-
-if [ ! -f $FIRSTRUN ]
-then
+	
+	$NGINX_ROOT/../run.sh
+	
 	# DDBapi
 	rm $INDEX_FILE.gz
 	echo "Add DDBapi JS..."
@@ -28,9 +25,9 @@ then
 	echo "Change title..."
 	sed -i 's/<title>Swagger UI<\/title>/<title>DDBapi | Documentation of the Application Programming Interface (API)<\/title>/g' $INDEX_FILE
 	gzip -k $INDEX_FILE
-fi
 
-touch $FIRSTRUN
+	touch $FIRSTRUN
+fi
 
 # Run last Swagger script line
 eval "$LAST_LINE"
