@@ -1,4 +1,4 @@
-FROM swaggerapi/swagger-ui:v3.35.2
+FROM swaggerapi/swagger-ui:v3.36.0
 MAINTAINER Michael Büchner <m.buechner@dnb.de>
 
 RUN rm /usr/share/nginx/html/favicon-32x32.png /usr/share/nginx/html/favicon-16x16.png
