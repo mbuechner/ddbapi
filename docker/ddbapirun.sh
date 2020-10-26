@@ -9,7 +9,6 @@ LAST_LINE="exec nginx -g 'daemon off;'"
 
 if [ ! -f $FIRSTRUN ]
 then
-	touch $FIRSTRUN
 	# Run Swagger script, but without last line
 	echo "Remove: $LAST_LINE"
 	sed -i "/$LAST_LINE/d" $NGINX_ROOT/../run.sh
@@ -31,6 +30,8 @@ then
 	sed -i 's/<title>Swagger UI<\/title>/<title>DDBapi | Documentation of the Application Programming Interface (API)<\/title>/g' $INDEX_FILE
 	gzip -k $INDEX_FILE
 fi
+
+touch $FIRSTRUN
 
 # Run last Swagger script line
 eval "$LAST_LINE"
