@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Deutsche Digitale Bibliothek REST API
-  version: 6.6.1
+  version: '6.8'
   description: |
     *Authors:* Patrick Dinger and [Michael Büchner](https://pro.deutsche-digitale-bibliothek.de/user/37)
     ### Description
@@ -355,7 +355,7 @@ paths:
               - https://www.deutsche-digitale-bibliothek.de/ns/ddb-linkedData-profile
       responses:
         '200':
-          $ref: '#/components/responses/200'
+          $ref: '#/components/responses/200-rdfxml'
         '403':
           $ref: '#/components/responses/403'
         '404':
@@ -1101,6 +1101,9 @@ paths:
           $ref: '#/components/responses/404'
         '500':
           $ref: '#/components/responses/500'
+      security: 
+        - Query_Parameter: []
+        - Request_Header: []
       tags:
         - search
   '/search/mlt':
@@ -1471,9 +1474,6 @@ paths:
           $ref: '#/components/responses/406'
         '500':
           $ref: '#/components/responses/500'
-      security: 
-        - Query_Parameter: []
-        - Request_Header: []
       tags:
         - version
   '/search/organization':
@@ -3532,10 +3532,25 @@ components:
         'application/json':
           schema:
             type: object
+        '*/*':
+          schema:
+            type: object
+    '200-rdfxml':
+      description: Success.
+      content:
+        'application/rdf+xml':
+          schema:
+            type: object
+        '*/*':
+          schema:
+            type: object
     '200-jsononly':
       description: Success.
       content:
         'application/json':
+          schema:
+            type: object
+        '*/*':
           schema:
             type: object
     '403':
@@ -3560,6 +3575,25 @@ components:
               name: error
               namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
         'application/xml':
+          schema:
+            properties:
+              message:
+                example: Your security level does not allow access to this method.
+                type: string
+              name:
+                example: NotAuthorizedException
+                type: string
+              stacktrace:
+                example: ''
+                type: string
+            required:
+              - name
+              - message
+            type: object
+            xml:
+              name: error
+              namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
+        '*/*':
           schema:
             properties:
               message:
@@ -3620,6 +3654,25 @@ components:
             xml:
               name: error
               namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
+        '*/*':
+          schema:
+            properties:
+              message:
+                example: Item 'ABCDEFGHIJKLMNOPQRSTUVWXYZ01234' not found.
+                type: string
+              name:
+                example: ItemNotFoundException
+                type: string
+              stacktrace:
+                example: ''
+                type: string
+            required:
+              - name
+              - message
+            type: object
+            xml:
+              name: error
+              namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
       description: |
         Not found. The requested method or resource does not exist or could no be found.
     '406':
@@ -3644,6 +3697,25 @@ components:
               name: error
               namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
         'application/xml':
+          schema:
+            properties:
+              message:
+                example: The requested type is not acceptable.
+                type: string
+              name:
+                example: NotAcceptableException
+                type: string
+              stacktrace:
+                example: ''
+                type: string
+            required:
+              - name
+              - message
+            type: object
+            xml:
+              name: error
+              namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
+        '*/*':
           schema:
             properties:
               message:
@@ -3691,6 +3763,27 @@ components:
               name: error
               namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
         'application/xml':
+          schema:
+            properties:
+              message:
+                example: |
+                  org.apache.solr.common.SolrException: undefined field
+                  provider_id
+                type: string
+              name:
+                example: GeneralException
+                type: string
+              stacktrace:
+                example: ''
+                type: string
+            required:
+              - name
+              - message
+            type: object
+            xml:
+              name: error
+              namespace: 'http://www.deutsche-digitale-bibliothek.de/error'
+        '*/*':
           schema:
             properties:
               message:
