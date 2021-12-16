@@ -10,10 +10,10 @@ For more information visit: https://github.com/swagger-api/swagger-ui
 
 ## Docker
 
-Yes, there's a docker container for DDBapi available at DockerHub: https://hub.docker.com/r/mbuechner/ddbapi
+Yes, there's a docker container for DDBapi available at GitHub: https://github.com/mbuechner/ddbapi/pkgs/container/ddbapi%2Fddbapi
 
 ```
-docker pull mbuechner/ddbapi:latest
+docker pull ghcr.io/mbuechner/ddbapi/ddbapi:latest
 ```
 
 ### Container build
