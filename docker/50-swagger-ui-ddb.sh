@@ -4,7 +4,7 @@ set -e
 NGINX_ROOT=/usr/share/nginx/html
 INDEX_FILE=$NGINX_ROOT/index.html
 INIT_FILE=$NGINX_ROOT/swagger-initializer.js
-FIRSTRUN=$NGINX_ROOT/../firstrun.txt
+FIRSTRUN=$NGINX_ROOT/.firstrun
 
 if [ ! -f $FIRSTRUN ]
 then
