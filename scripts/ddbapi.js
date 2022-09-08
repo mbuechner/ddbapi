@@ -16,7 +16,7 @@ const DDBLogoPlugin = function () {
                         React.createElement("img", {
                             className: "ddbLogo",
                             width: "320px",
-                            src: "./DDBpro_Logo_2_s_pos_RGB_G.svg"
+                            src: "./logo-ddbpro.svg"
                         }),
                         null))
             }
