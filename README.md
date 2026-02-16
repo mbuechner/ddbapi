@@ -13,7 +13,7 @@ npm install
 npm start
 ```
 
-Open `http://localhost:8080` to view the Swagger UI. By default the UI loads the example spec at [example/ddbapi.yml](example/ddbapi.yml).
+Open `http://localhost:8080` to view the Swagger UI.
 
 **Build (local)**
 - **Build image**: `docker build -t ddbapi .`
@@ -34,11 +34,10 @@ docker push ghcr.io/<owner>/ddbapi:TAG
 - **Server**: [server.js](server.js)
 - **Public UI**: [public/index.html](public/index.html)
 - **Plugins / scripts**: [scripts/ddb-plugins.js](scripts/ddb-plugins.js)
-- **Example OpenAPI**: [example/ddbapi.yml](example/ddbapi.yml)
 
 **Development notes**
 - **Node version**: Use Node.js 18+ for best compatibility.
-- **Static assets**: The app serves `images/`, `scripts/` and `example/` statically — useful when adding logos or specs.
+- **Static assets**: The app serves `images/` and `scripts/` statically — useful when adding logos or specs.
 - **Swagger UI customization**: The API selector and logo are implemented as a Swagger UI plugin in `scripts/ddb-plugins.js`.
 
 **Reverse proxy / client IPs**
@@ -51,6 +50,6 @@ docker push ghcr.io/<owner>/ddbapi:TAG
 
 **Troubleshooting**
 - If `npm start` fails, run `npm ci` instead of `npm install` and check that port `8080` is free.
-- If external OpenAPI URLs fail to load in the browser, the target server may block cross-origin requests (CORS). In that case run the spec through a proxy or host the spec in this repository under `example/`.
+- If external OpenAPI URLs fail to load in the browser, the target server may block cross-origin requests (CORS).
 
 If you want, I can also update the README with explicit GHCR publishing instructions (PAT usage) or add a short section about running the container as a non-root user for Kubernetes.
