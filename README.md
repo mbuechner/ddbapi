@@ -1,4 +1,4 @@
-![Docker](https://github.com/mbuechner/ddbapi/workflows/Docker/badge.svg)
+[![Docker](https://github.com/mbuechner/ddbapi/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/mbuechner/ddbapi/actions/workflows/docker-publish.yml)
 
 # DDBapi — API Documentation
 Documentation of the API of the Deutsche Digitale Bibliothek (DDB). This project serves a customized Swagger UI that can be run as a container or locally.
