@@ -4,8 +4,8 @@
 Documentation of the API of the Deutsche Digitale Bibliothek (DDB). This project serves a customized Swagger UI that can be run as a container or locally.
 
 **Quick Start**
-- **Pull image**: `docker pull ghcr.io/mbuechner/ddbapi/ddbapi:latest`
-- **Run container**: `docker run -d -p 8080:8080 ghcr.io/mbuechner/ddbapi/ddbapi:latest` then open `http://localhost:8080`.
+- **Pull image**: `docker pull ghcr.io/mbuechner/ddbapi:latest`
+- **Run container**: `docker run -d -p 8080:8080 ghcr.io/mbuechner/ddbapi:latest` then open `http://localhost:8080`.
 - **Run locally**:
 
 ```bash
