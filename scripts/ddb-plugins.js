@@ -78,6 +78,30 @@
             try {
               const downloadWrapper = document.querySelector('.download-url-wrapper');
               if (downloadWrapper) {
+                // inject responsive styles once
+                if (!document.getElementById('ddb-plugin-responsive-styles')) {
+                  const style = document.createElement('style');
+                  style.id = 'ddb-plugin-responsive-styles';
+                  style.textContent = `
+                    /* Dropdown/button layout */
+                    .download-url-wrapper { display:flex; flex-direction:row; align-items:center; gap:8px; }
+                    .download-url-input { width: auto; min-width:350px; max-width:480px; }
+                    
+
+                    /* Keep the topbar logo a consistent size across viewport widths. */
+                    .topbar .link img,
+                    .swagger-ui .topbar .link img,
+                    img#ddb-logo-img { height: clamp(28px, 4vw, 48px) !important; width: auto !important; object-fit: contain !important; }
+
+                    @media (max-width: 720px) {                 
+                      .download-url-wrapper { flex-direction:column; align-items:flex-start; gap:6px; padding:6px 0; }
+                      .download-url-wrapper .download-url-input { width:100%; max-width: calc(100vw - 32px); box-sizing:border-box; }
+                      .download-url-wrapper .download-url-button { width:100%; box-sizing:border-box; }
+                    }
+                  `;
+                  document.head.appendChild(style);
+                }
+
                 // create replacement node that matches structure and classes
                 const repl = document.createElement('form');
                 repl.className = 'download-url-wrapper';
@@ -140,8 +164,8 @@
                 while (link.firstChild) link.removeChild(link.firstChild);
                 const img = document.createElement('img');
                 img.id = 'ddb-logo-img';
-                img.alt = 'DDB';
-                img.style.height = '40px';
+                img.alt = 'Logo of German Digital Library';
+                img.style.minWidth = '80px';
                 img.style.display = 'inline-block';
                 img.src = 'images/logo-ddbpro-RGB-white.svg';
                 link.appendChild(img);
@@ -166,29 +190,8 @@
     };
   };
 
-  // --- Logo Plugin ---
-  const DDBLogoPlugin = function () {
-    return {
-      wrapComponents: {
-        Topbar: (Original, { React }) => (props) => {
-          const logo = React.createElement('img', {
-            className: 'ddbLogo',
-            width: '200px',
-            src: 'images/logo-ddbpro.svg',
-            style: { marginRight: '12px' }
-          });
-
-          const original = React.createElement(Original, props);
-          const wrapper = React.createElement('div', { className: 'wrapper', style: { display: 'flex', alignItems: 'center' } }, [logo, original]);
-          return wrapper;
-        }
-      }
-    };
-  };
-
   // Expose
   window.ApiSelectorPlugin = ApiSelectorPlugin;
-  window.DDBLogoPlugin = DDBLogoPlugin;
   window.computeInitialApiUrl = computeInitialApiUrl;
 })();
 
