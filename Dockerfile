@@ -16,6 +16,7 @@ RUN chown -R appuser:appgroup /usr/src/app
 
 USER appuser
 ENV NODE_ENV=production
+ENV NODE_OPTIONS=""
 
 EXPOSE 8080
 

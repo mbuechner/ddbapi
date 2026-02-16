@@ -41,6 +41,14 @@ docker push ghcr.io/<owner>/ddbapi:TAG
 - **Static assets**: The app serves `images/`, `scripts/` and `example/` statically — useful when adding logos or specs.
 - **Swagger UI customization**: The API selector and logo are implemented as a Swagger UI plugin in `scripts/ddb-plugins.js`.
 
+**Reverse proxy / client IPs**
+- If the server runs behind a reverse proxy (typical in production), the client IP will be provided in the `X-Forwarded-For` header. The app honors these headers by default.
+- You can control this with the `TRUST_PROXY` environment variable. Examples:
+	- `TRUST_PROXY=true` — trust the proxy (default in this project)
+	- `TRUST_PROXY=false` — do not trust proxy headers (use the socket address)
+	- `TRUST_PROXY="127.0.0.1/8"` — trust specific proxy addresses or subnets
+- With `trust proxy` enabled, `req.ip` will reflect the original client IP and the request-logging will include it.
+
 **Troubleshooting**
 - If `npm start` fails, run `npm ci` instead of `npm install` and check that port `8080` is free.
 - If external OpenAPI URLs fail to load in the browser, the target server may block cross-origin requests (CORS). In that case run the spec through a proxy or host the spec in this repository under `example/`.

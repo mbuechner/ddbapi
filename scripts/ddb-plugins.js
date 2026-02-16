@@ -143,11 +143,11 @@
                 img.alt = 'DDB';
                 img.style.height = '40px';
                 img.style.display = 'inline-block';
-                img.src = '/images/logo-ddbpro-RGB-white.svg';
+                img.src = 'images/logo-ddbpro-RGB-white.svg';
                 link.appendChild(img);
                 // Only set anchor attributes if element is an anchor
                 if (link.tagName && link.tagName.toLowerCase() === 'a') {
-                  link.href = '/images/logo-ddbpro-RGB-white.svg';
+                  link.href = 'images/logo-ddbpro-RGB-white.svg';
                   link.setAttribute('rel', 'noopener noreferrer');
                   link.setAttribute('target', '_blank');
                 }
@@ -174,7 +174,7 @@
           const logo = React.createElement('img', {
             className: 'ddbLogo',
             width: '200px',
-            src: '/images/logo-ddbpro.svg',
+            src: 'images/logo-ddbpro.svg',
             style: { marginRight: '12px' }
           });
 
