@@ -1,14 +1,16 @@
 {
-  "name": "ddbapi",
-  "version": "0.1.0",
-  "description": "Serve Swagger UI without Docker",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "express": "^5.2.1",
-    "swagger-ui": "^5.31.1",
-    "swagger-ui-dist": "^5.31.1"
-  }
+    "name": "ddbapi",
+    "version": "5.31.1",
+    "description": "Serve Swagger UI without Docker",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "express": "^5.2.1",
+        "swagger-ui": "^5.31.1",
+        "swagger-ui-dist": "^5.31.1"
+    }
 }
