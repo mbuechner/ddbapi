@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DDBapi | Documentation of the Application Programming Interface (API)</title>
+    <link rel="stylesheet" type="text/css" href="/swagger-ui/swagger-ui.css">
+    <style>
+      html { box-sizing: border-box; overflow: -moz-scrollbars-vertical; }
+      *, *:before, *:after { box-sizing: inherit; }
+      body { margin:0; background: #fafafa; }
+    </style>
+  </head>
+  <body>
+    <!-- control bar is injected into Swagger UI via plugin -->
+
+    <div id="swagger-ui"></div>
+
+    <script src="/swagger-ui/swagger-ui-bundle.js"></script>
+    <script src="/swagger-ui/swagger-ui-standalone-preset.js"></script>
+    <script src="/scripts/ddb-plugins.js"></script>
+    <script>
+      (function () {
+        const apiUrl = window.computeInitialApiUrl();
+
+        // Initialize as soon as DOM is ready (faster than window.onload)
+        document.addEventListener('DOMContentLoaded', () => {
+          try {
+            const ui = SwaggerUIBundle({
+              url: apiUrl,
+              dom_id: '#swagger-ui',
+              presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+              ],
+              layout: 'StandaloneLayout',
+              plugins: [window.ApiSelectorPlugin],
+              // security / privacy: disable the external validator service
+              validatorUrl: null,
+              // enable deep linking for direct links to operations
+              deepLinking: true
+            });
+            window.ui = ui;
+          } catch (err) {
+            console.error('Failed to initialize Swagger UI', err);
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
