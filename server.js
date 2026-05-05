@@ -5,6 +5,15 @@ const swaggerUiDist = require('swagger-ui-dist');
 const app = express();
 const port = parseInt(process.env.PORT, 10) || 8080;
 
+function normalizeBasePath(input) {
+    const raw = String(input || '').trim();
+    if (!raw || raw === '/') return '';
+    const withLeadingSlash = raw.startsWith('/') ? raw : `/${raw}`;
+    return withLeadingSlash.replace(/\/+$/, '');
+}
+
+const basePath = normalizeBasePath(process.env.BASE_PATH);
+
 // Security: hide framework info
 app.disable('x-powered-by');
 
@@ -45,20 +54,49 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/images', express.static(path.join(__dirname, 'images'), staticOpts));
-app.use('/scripts', express.static(path.join(__dirname, 'scripts'), staticOpts));
+// Canonicalize UI entry URLs to trailing slash so relative assets resolve
+// correctly when the app is hosted under a subpath (e.g. /app/ddbapi/).
+app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+
+    const p = req.path || '/';
+    const hasFileExtension = path.extname(p) !== '';
+    const excludedPrefix = p.startsWith('/images') || p.startsWith('/scripts') || p.startsWith('/swagger-ui') || p.startsWith('/health');
+
+    if (p !== '/' && !p.endsWith('/') && !hasFileExtension && !excludedPrefix) {
+        const queryIndex = req.originalUrl.indexOf('?');
+        const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : '';
+        return res.redirect(308, `${p}/${query}`);
+    }
+
+    next();
+});
+
+const uiRouter = express.Router();
+
+uiRouter.use('/images', express.static(path.join(__dirname, 'images'), staticOpts));
+uiRouter.use('/scripts', express.static(path.join(__dirname, 'scripts'), staticOpts));
 
 // Serve swagger-ui static files from swagger-ui-dist (these are versioned; longer cache)
-app.use('/swagger-ui', express.static(swaggerUiDist.getAbsoluteFSPath(), uiStaticOpts));
+uiRouter.use('/swagger-ui', express.static(swaggerUiDist.getAbsoluteFSPath(), uiStaticOpts));
 
 // Serve a simple index that initializes Swagger UI
-app.get('/', (req, res) => {
+uiRouter.get('/', (req, res) => {
     // Use `root` option to avoid accidental path traversal and make intent explicit
     res.sendFile('index.html', { root: path.join(__dirname, 'public') });
 });
 
 // Simple health endpoint for readiness/liveness checks
-app.get('/health', (req, res) => res.sendStatus(200));
+uiRouter.get('/health', (req, res) => res.sendStatus(200));
+
+// Always expose routes at root (for proxy rewrite-target: /)
+app.use('/', uiRouter);
+
+// Optionally expose the same routes under a configured base path
+// (for setups without path rewrite, e.g. /app/ddbapi).
+if (basePath) {
+    app.use(basePath, uiRouter);
+}
 
 // Basic error handler (log + generic 500)
 app.use((err, req, res, next) => {
@@ -69,7 +107,7 @@ app.use((err, req, res, next) => {
 
 // Start server and support graceful shutdown
 const server = app.listen(port, () => {
-    logger.info({ port }, `ddbapi server listening`);
+    logger.info({ port, basePath: basePath || '/' }, `ddbapi server listening`);
 });
 
 function shutdown(signal) {

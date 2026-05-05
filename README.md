@@ -29,27 +29,23 @@ echo $CR_PAT | docker login ghcr.io -u <username> --password-stdin
 docker push ghcr.io/<owner>/ddbapi:TAG
 ```
 
-**Important files**
-- **Dockerfile**: [Dockerfile](Dockerfile)
-- **Server**: [server.js](server.js)
-- **Public UI**: [public/index.html](public/index.html)
-- **Plugins / scripts**: [scripts/ddb-plugins.js](scripts/ddb-plugins.js)
 
-**Development notes**
-- **Node version**: Use Node.js 18+ for best compatibility.
-- **Static assets**: The app serves `images/` and `scripts/` statically — useful when adding logos or specs.
-- **Swagger UI customization**: The API selector and logo are implemented as a Swagger UI plugin in `scripts/ddb-plugins.js`.
+**Base path / OpenShift route**
+- Set `BASE_PATH` if the app is exposed under a path prefix without backend rewrite (example: `BASE_PATH=/app/ddbapi`).
+- `BASE_PATH` is normalized automatically, so all of these values are equivalent: `app/ddbapi`, `/app/ddbapi`, `/app/ddbapi/`.
+- The app remains available at `/` as well, which keeps compatibility with OpenShift routes using `haproxy.router.openshift.io/rewrite-target: /`.
+- Entry URLs without trailing slash are redirected to the canonical slash form (HTTP 308), so both `/app/ddbapi` and `/app/ddbapi/` work reliably.
 
-**Reverse proxy / client IPs**
-- If the server runs behind a reverse proxy (typical in production), the client IP will be provided in the `X-Forwarded-For` header. The app honors these headers by default.
-- You can control this with the `TRUST_PROXY` environment variable. Examples:
-	- `TRUST_PROXY=true` — trust the proxy (default in this project)
-	- `TRUST_PROXY=false` — do not trust proxy headers (use the socket address)
-	- `TRUST_PROXY="127.0.0.1/8"` — trust specific proxy addresses or subnets
-- With `trust proxy` enabled, `req.ip` will reflect the original client IP and the request-logging will include it.
+Examples:
+
+```bash
+# No path rewrite at proxy/route
+docker run -d -p 8080:8080 -e BASE_PATH=/app/ddbapi ghcr.io/mbuechner/ddbapi:latest
+
+# With OpenShift rewrite-target: / (BASE_PATH can stay unset)
+docker run -d -p 8080:8080 ghcr.io/mbuechner/ddbapi:latest
+```
 
 **Troubleshooting**
 - If `npm start` fails, run `npm ci` instead of `npm install` and check that port `8080` is free.
 - If external OpenAPI URLs fail to load in the browser, the target server may block cross-origin requests (CORS).
-
-If you want, I can also update the README with explicit GHCR publishing instructions (PAT usage) or add a short section about running the container as a non-root user for Kubernetes.
