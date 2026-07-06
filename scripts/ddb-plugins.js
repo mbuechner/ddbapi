@@ -11,7 +11,7 @@
     '2': 'https://api.deutsche-digitale-bibliothek.de/2/q/openapi'
   };
 
-  const defaultUrl = mapping['1'];
+  const defaultUrl = mapping['2'];
 
   function normalize(u) {
     return (u || '').replace(/\/+$/, '');
@@ -64,7 +64,7 @@
           }
 
           function openRaw() {
-            const val = document.getElementById('docSelectPlugin')?.value || '1';
+            const val = document.getElementById('docSelectPlugin')?.value || '2';
             const u = mapping[val] || defaultUrl;
             // use noopener for safety
             window.open(u, '_blank', 'noopener');
@@ -127,7 +127,7 @@
 
                 btn.addEventListener('click', (ev) => {
                   ev.preventDefault();
-                  const val = sel.value || '1';
+                  const val = sel.value || '2';
                   // only allow mapped values here (no arbitrary URLs)
                   const resolved = mapping[val] || defaultUrl;
                   const sp = new URLSearchParams(window.location.search);
@@ -144,7 +144,7 @@
 
                 sel.addEventListener('change', () => {
                   // keep URL in sync when changed; only use mapping keys
-                  const val = sel.value || '1';
+                  const val = sel.value || '2';
                   const resolved = mapping[val] || defaultUrl;
                   const sp = new URLSearchParams(window.location.search);
                   sp.set('url', resolved);
