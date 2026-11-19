@@ -1,4 +1,4 @@
-FROM node:26-alpine3 AS dependencies
+FROM node:26-alpine AS dependencies
 
 WORKDIR /usr/src/app
 ARG SOURCE_DATE_EPOCH
