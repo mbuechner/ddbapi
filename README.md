@@ -9,26 +9,23 @@ Documentation of the API of the Deutsche Digitale Bibliothek (DDB). This project
 - **Run locally**:
 
 ```bash
-npm install
+npm ci
 npm start
 ```
 
-Open `http://localhost:8080` to view the Swagger UI.
+Use Node.js 26 LTS. Open `http://localhost:8080` to view the Swagger UI.
 
 **Build (local)**
 - **Build image**: `docker build -t ddbapi .`
 - **Run locally**: `docker run -d -p 8080:8080 ddbapi`
 
-**CI / Registry**
-- The repository includes a GitHub Actions workflow that builds and pushes images to GitHub Container Registry (GHCR): [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml).
-- To manually push to GHCR:
+## Container releases
 
-```bash
-docker build -t ghcr.io/<owner>/ddbapi:TAG .
-echo $CR_PAT | docker login ghcr.io -u <username> --password-stdin
-docker push ghcr.io/<owner>/ddbapi:TAG
-```
+- Stable releases with the [Docker workflow](.github/workflows/docker-publish.yml) queue a run on `master`. For manual runs, choose `master` and optionally set `release_tag`. Builds use the tagged source and Dockerfile.
+- Daily at 08:17 Europe/Berlin, rebuild `linux/amd64` on a changed release commit, changed base digest, or missing version tag. Otherwise rescan the published digest.
+- HTTP probe → CVE scan (image + SBOM if present) → Cosign → GHCR version tag. The maintained release also gets `latest` and `tagged`.
 
+`CONTAINER_RELEASE_TAG` pins a release instead of the latest stable one. `CONTAINER_HTTP_PATH` overrides `/`.
 
 **Base path / OpenShift route**
 - Set `BASE_PATH` if the app is exposed under a path prefix without backend rewrite (example: `BASE_PATH=/app/ddbapi`).
@@ -47,5 +44,5 @@ docker run -d -p 8080:8080 ghcr.io/mbuechner/ddbapi:latest
 ```
 
 **Troubleshooting**
-- If `npm start` fails, run `npm ci` instead of `npm install` and check that port `8080` is free.
+- If `npm start` fails, verify that `npm ci` completed and port `8080` is free.
 - If external OpenAPI URLs fail to load in the browser, the target server may block cross-origin requests (CORS).

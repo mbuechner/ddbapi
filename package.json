@@ -3,15 +3,18 @@
     "version": "5.32.8",
     "description": "Serve Swagger UI without Docker",
     "main": "server.js",
+    "engines": {
+        "node": "26.x"
+    },
     "scripts": {
         "start": "node server.js"
     },
     "dependencies": {
-        "react": "^19.2.7",
-        "react-dom": "^19.2.7",
-        "pino": "^10.3.1",
-        "express": "^5.2.1",
-        "swagger-ui": "^5.32.8",
-        "swagger-ui-dist": "^5.32.8"
+        "react": "^19.3.1",
+        "react-dom": "^19.3.1",
+        "pino": "^10.4.0",
+        "express": "^5.3.0",
+        "swagger-ui": "^5.35.1",
+        "swagger-ui-dist": "^5.35.1"
     }
 }
