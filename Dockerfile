@@ -1,5 +1,4 @@
-FROM node:26-trixie-slim
-LABEL maintainer="Michael Büchner <m.buechner@dnb.de>"
+FROM node:26-alpine3 AS dependencies
 
 WORKDIR /usr/src/app
 ARG SOURCE_DATE_EPOCH
@@ -33,13 +32,25 @@ COPY images/ ./images/
 COPY public/ ./public/
 COPY scripts/ ./scripts/
 
-# Create the non-root account. Debian's useradd uses SOURCE_DATE_EPOCH.
-RUN groupadd --system appgroup \
-    && useradd --system --gid appgroup --create-home --no-log-init --shell /usr/sbin/nologin appuser \
-    && chown -R appuser:appgroup /usr/src/app
+FROM alpine:3
+LABEL maintainer="Michael Büchner <m.buechner@dnb.de>"
+ARG SOURCE_DATE_EPOCH
+
+WORKDIR /usr/src/app
+RUN apk upgrade --no-cache \
+    && apk add --no-cache libstdc++ libatomic \
+    && addgroup -S appgroup \
+    && adduser -S -G appgroup appuser \
+    && chown appuser:appgroup .
+
+COPY --from=dependencies /usr/local/bin/node /usr/local/bin/node
+COPY --from=dependencies /usr/local/LICENSE /usr/local/share/doc/node/LICENSE
+COPY --from=dependencies --chown=appuser:appgroup /usr/src/app/ ./
 
 USER appuser
 ENV NODE_ENV=production
+
+RUN node --version
 
 EXPOSE 8080
 
