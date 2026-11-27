@@ -73,7 +73,7 @@ runs:
 
     - name: Scan image for known vulnerabilities
       id: image-scan
-      uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+      uses: anchore/scan-action@11983a512817154c80a9db660c1a184be7513ed6 # v7.4.3
       with:
         image: ${{ inputs.image }}
         output-format: json
@@ -83,7 +83,7 @@ runs:
     - name: Scan dependencies from the CycloneDX SBOM
       id: sbom-scan
       if: steps.smoke.outputs.sbom != ''
-      uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+      uses: anchore/scan-action@11983a512817154c80a9db660c1a184be7513ed6 # v7.4.3
       with:
         sbom: ${{ steps.smoke.outputs.sbom }}
         output-format: json
